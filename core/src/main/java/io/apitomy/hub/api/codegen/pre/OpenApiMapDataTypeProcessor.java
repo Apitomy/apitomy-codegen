@@ -16,28 +16,32 @@
 
 package io.apitomy.hub.api.codegen.pre;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.apitomy.datamodels.models.Document;
 import io.apitomy.datamodels.models.Schema;
 import io.apitomy.datamodels.models.openapi.v3x.v31.OpenApi31Schema;
 import io.apitomy.datamodels.util.NodeUtil;
 import io.apitomy.hub.api.codegen.CodegenExtensions;
+import io.apitomy.hub.api.codegen.JaxRsProjectSettings;
 import io.apitomy.hub.api.codegen.jaxrs.TraversingOpenApi31VisitorAdapter;
 import io.apitomy.hub.api.codegen.util.CodegenUtil;
-
-import java.util.Map;
 
 /**
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiMapDataTypeProcessor extends TraversingOpenApi31VisitorAdapter {
 
-    private static final Map<String, String> EXTENSION_NAMES = Map.of(
-            "StringMap",
-            "java.util.Map<String,String>",
-            "StringObjectMap",
-            "java.util.Map<String,Object>"
-    );
+    private static final Set<String> EXTENSION_NAMES = Set.of("StringMap", "StringObjectMap", "ArrayMap");
+    private final JaxRsProjectSettings settings;
+    private final Document document;
+
+    public OpenApiMapDataTypeProcessor(JaxRsProjectSettings settings, Document document) {
+        this.settings = settings;
+        this.document = document;
+    }
 
     /**
      * @see io.apitomy.datamodels.models.openapi.v3x.v31.visitors.OpenApi31VisitorAdapter#visitSchema(io.apitomy.datamodels.models.Schema)
@@ -46,20 +50,39 @@ public class OpenApiMapDataTypeProcessor extends TraversingOpenApi31VisitorAdapt
     public void visitSchema(Schema node) {
         if (NodeUtil.isDefinition(node)) {
             OpenApi31Schema schema = (OpenApi31Schema) node;
-            if (isMapType(schema)) {
-                schema.setAdditionalProperties(null);
-                String javaType = EXTENSION_NAMES.get(CodegenUtil.getExtension(schema, CodegenExtensions.TYPE).asText());
-                schema.addExtraProperty("existingJavaType", factory.textNode(javaType));
+            JsonNode typeExtension = CodegenUtil.getExtension(schema, CodegenExtensions.TYPE);
+            if (typeExtension == null || !typeExtension.isTextual() || !EXTENSION_NAMES.contains(typeExtension.asText())) {
+                return;
             }
+
+            OpenApi31Schema additionalProperties = schema.getAdditionalProperties() != null
+                    && schema.getAdditionalProperties().isSchema()
+                            ? (OpenApi31Schema) schema.getAdditionalProperties().asSchema()
+                            : null;
+
+            schema.setAdditionalProperties(null);
+            schema.addExtraProperty("existingJavaType", factory.textNode(buildJavaType(typeExtension.asText(), additionalProperties)));
         }
     }
 
-    private boolean isMapType(OpenApi31Schema schema) {
-        JsonNode extension = CodegenUtil.getExtension(schema, CodegenExtensions.TYPE);
-        if (extension == null || !extension.isTextual()) {
-            return false;
+    private String buildJavaType(String alias, OpenApi31Schema additionalProperties) {
+        if ("StringMap".equals(alias)) {
+            return "java.util.Map<String, String>";
         }
-        return EXTENSION_NAMES.get(extension.asText()) != null;
+
+        if ("StringObjectMap".equals(alias)) {
+            return "java.util.Map<String, Object>";
+        }
+
+        if ("ArrayMap".equals(alias)) {
+            String valueType = "java.lang.Object";
+            if (additionalProperties != null) {
+                valueType = CodegenUtil.resolveJavaType(settings, document, additionalProperties, settings.getJavaPackage() + ".beans");
+            }
+            return "java.util.Map<String, " + valueType + ">";
+        }
+
+        return "java.util.Map<String, Object>";
     }
 
 }
