@@ -1,6 +1,6 @@
 site_name: Apitomy Codegen
 site_description: Open Source API Design Code Generator
-site_author: Red Hat
+site_author: Apitomy
 site_url: https://www.apitomy.io/codegen/docs/
 
 repo_name: Apitomy/apitomy-codegen
@@ -23,8 +23,6 @@ theme:
     - search.share
     - search.suggest
     - content.code.copy
-  logo: https://www.apitomy.io/images/subprojects/apitomy_codegen_logo_reverse.svg
-  favicon: https://www.apitomy.io/images/apitomy_icon.png
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -52,7 +50,6 @@ site_dir: ./site
 
 plugins:
   - search
-  - mkdocstrings
 
 extra:
   social:

@@ -11,10 +11,11 @@ on:
 jobs:
   publish-docs:
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'Apitomy'
 
     steps:
       - name: Checkout apitomy-codegen
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -26,13 +27,12 @@ jobs:
           pip install mkdocs>=1.5.0
           pip install mkdocs-material>=9.0.0
           pip install pymdown-extensions
-          pip install mkdocstrings
 
       - name: Build documentation
         run: mkdocs build --strict
 
       - name: Checkout website repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: Apitomy/apitomy.github.io
           token: ${{ secrets.ACCESS_TOKEN }}
@@ -47,8 +47,8 @@ jobs:
       - name: Commit and push to website
         run: |
           cd website
-          git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
+          git config user.name "apitomy-ci"
+          git config user.email "apitomy.ci@gmail.com"
           git add codegen/docs
           if git diff --staged --quiet; then
             echo "No changes to commit"

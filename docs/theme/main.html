@@ -1,43 +1,24 @@
 {% extends "base.html" %}
 
 {% block announce %}
-<!-- Apitomy Custom Masthead -->
 <div class="masthead-container">
     <div class="masthead">
         <div class="logo">
-            <a href="https://www.apitomy.io/"><img src="https://www.apitomy.io/images/apitomy_headerlogo.png" class="project-logo" title="Apitomy"></a>
+            <a href="https://www.apitomy.io/" style="color: #C2410C; font-weight: 700;
+               font-size: 1.3rem; text-decoration: none;">Apitomy</a>
         </div>
-
         <nav id="main-nav" class="main-nav">
             <ul id="menu" class="menu">
-                <li>
-                    <a href="/registry/">Registry</a>
-                </li>
-                <li>
-                    <a href="/studio/">Studio<sup>*</sup></a>
-                </li>
-                <li>
-                    <a href="/datamodels/">Data Models</a>
-                </li>
-                <li>
-                    <a href="/codegen/" class="active">Codegen</a>
-                </li>
-                <li>
-                    <a href="/apitomito/">Apitomito</a>
-                </li>
+                <li><a href="https://www.apitomy.io/projects/data-models/">Data Models</a></li>
+                <li><a href="https://www.apitomy.io/projects/data-models-mcp/">MCP</a></li>
+                <li><a href="https://www.apitomy.io/projects/codegen/" class="active">Codegen</a></li>
+                <li><a href="https://www.apitomy.io/projects/openapi-editor/">Editor</a></li>
+                <li><a href="https://www.apitomy.io/projects/apicurito/">Apicurito</a></li>
                 <li class="nav-divider"></li>
-                <li>
-                    <a href="/blog/">Blog</a>
-                </li>
-                <li>
-                    <a href="/contact/">Contact</a>
-                </li>
-                <li>
-                    <a href="https://github.com/Apitomy">Fork</a>
-                </li>
+                <li><a href="https://www.apitomy.io/blog/">Blog</a></li>
+                <li><a href="https://github.com/Apitomy">GitHub</a></li>
             </ul>
         </nav>
     </div>
 </div>
-
 {% endblock %}
