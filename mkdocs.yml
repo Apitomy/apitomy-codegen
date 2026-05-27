@@ -1,7 +1,7 @@
 site_name: Apitomy Codegen
 site_description: Open Source API Design Code Generator
 site_author: Apitomy
-site_url: https://www.apitomy.io/codegen/docs/
+site_url: https://www.apitomy.io/projects/codegen/docs/
 
 repo_name: Apitomy/apitomy-codegen
 repo_url: https://github.com/Apitomy/apitomy-codegen

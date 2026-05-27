@@ -40,16 +40,16 @@ jobs:
 
       - name: Copy generated docs to website
         run: |
-          rm -rf website/codegen/docs
-          mkdir -p website/codegen
-          cp -r site website/codegen/docs
+          rm -rf website/projects/codegen/docs
+          mkdir -p website/projects/codegen
+          cp -r site website/projects/codegen/docs
 
       - name: Commit and push to website
         run: |
           cd website
           git config user.name "apitomy-ci"
           git config user.email "apitomy.ci@gmail.com"
-          git add codegen/docs
+          git add projects/codegen/docs
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
