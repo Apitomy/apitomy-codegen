@@ -4,49 +4,134 @@
  */
 
 :root {
-    /* Apitomy Color Palette */
-    --apitomy-navy: #22252C;
-    --apitomy-red: #CC0000;
-    --apitomy-accent: #FFCC00;
-    --apitomy-codegen: #5FBAA7;  /* Teal/green accent for Codegen */
-    --apitomy-grey-light: #EAE8E8;
-    --apitomy-grey-medium: #AFB1B2;
-    --apitomy-grey-dark: #646464;
+    --apitomy-bg-dark: #0F172A;
+    --apitomy-accent: #C2410C;
+    --apitomy-accent-dark: #9A3412;
+    --apitomy-primary: #4338CA;
+    --apitomy-primary-light: #6366F1;
+    --apitomy-codegen: #0284C7;
+    --apitomy-codegen-light: #38BDF8;
+    --apitomy-text: #1E293B;
+    --apitomy-text-light: #64748B;
+    --apitomy-border: #E2E8F0;
+    --apitomy-bg-light: #F8FAFC;
 
-    /* Material Design overrides */
-    --md-primary-fg-color: var(--apitomy-navy);
-    --md-primary-fg-color--light: #3a3d45;
-    --md-primary-fg-color--dark: #151618;
+    --md-primary-fg-color: var(--apitomy-bg-dark);
+    --md-primary-fg-color--light: #1E293B;
+    --md-primary-fg-color--dark: #020617;
     --md-accent-fg-color: var(--apitomy-codegen);
-    --md-accent-fg-color--transparent: rgba(95, 186, 167, 0.1);
+    --md-accent-fg-color--transparent: rgba(2, 132, 199, 0.1);
 
-    /* Typography */
-    --md-text-font: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    --md-code-font: "Roboto Mono", "Courier New", monospace;
+    --md-text-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                     "Helvetica Neue", Arial, sans-serif;
+    --md-code-font: "SFMono-Regular", Menlo, Monaco, Consolas,
+                     "Liberation Mono", monospace;
 }
 
-/* Header customization */
+/* ============================================================================
+   Apitomy Masthead - matches apitomy.io site header
+   ============================================================================ */
+
+.md-banner {
+    all: unset;
+    display: block;
+    box-sizing: border-box;
+    font: inherit;
+    color: inherit;
+    line-height: normal;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    text-decoration: none;
+}
+
+.md-banner, .md-banner > div {
+    width: 100%;
+    height: 64px;
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+}
+
+.apitomy-masthead {
+    width: 100%;
+    background-color: var(--apitomy-bg-dark);
+    height: 64px;
+    display: flex;
+    justify-content: center;
+}
+
+.apitomy-masthead-inner {
+    width: 100%;
+    max-width: 1140px;
+    height: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.apitomy-masthead-logo {
+    color: var(--apitomy-accent) !important;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-decoration: none !important;
+}
+
+.apitomy-masthead-logo:hover {
+    color: var(--apitomy-accent) !important;
+    text-decoration: none !important;
+}
+
+.apitomy-masthead-nav {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.apitomy-masthead-nav a {
+    color: #CBD5E1 !important;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none !important;
+    transition: color 0.2s;
+    text-transform: none;
+}
+
+.apitomy-masthead-nav a:hover {
+    color: #FFFFFF !important;
+    text-decoration: none !important;
+}
+
+.apitomy-masthead-github {
+    display: flex;
+    align-items: center;
+}
+
+/* ============================================================================
+   MkDocs Material Theme Overrides
+   ============================================================================ */
+
 .md-header {
-    background-color: var(--apitomy-navy);
+    background-color: var(--apitomy-bg-dark);
 }
 
 .md-header__title {
     font-weight: 500;
-    visibility: hidden;
 }
 
-/* Navigation tabs */
 .md-tabs {
-    background-color: var(--apitomy-navy);
+    background-color: var(--apitomy-bg-dark);
 }
 
 .md-tabs__link--active {
-    color: var(--apitomy-accent);
+    color: var(--apitomy-codegen-light);
 }
 
-/* Primary navigation */
 .md-nav--primary .md-nav__title {
-    background-color: var(--apitomy-navy);
+    background-color: var(--apitomy-bg-dark);
 }
 
 /* Links */
@@ -55,21 +140,21 @@
 }
 
 .md-typeset a:hover {
-    color: var(--apitomy-red);
+    color: var(--apitomy-accent);
 }
 
 /* Code blocks */
 .md-typeset code {
-    background-color: rgba(95, 186, 167, 0.1);
-    border-radius: 3px;
+    background-color: rgba(2, 132, 199, 0.08);
+    border-radius: 4px;
 }
 
 .md-typeset pre code {
-    color: #ccc;
+    color: #E2E8F0;
 }
 
 .md-typeset pre > code {
-    background-color: var(--apitomy-navy);
+    background-color: var(--apitomy-bg-dark);
 }
 
 /* Admonitions */
@@ -80,17 +165,17 @@
 
 .md-typeset .admonition-title,
 .md-typeset summary {
-    background-color: rgba(95, 186, 167, 0.1);
+    background-color: rgba(2, 132, 199, 0.08);
 }
 
 /* Tables */
 .md-typeset table:not([class]) th {
-    background-color: var(--apitomy-navy);
+    background-color: var(--apitomy-bg-dark);
     color: white;
 }
 
 .md-typeset table:not([class]) tr:hover {
-    background-color: rgba(95, 186, 167, 0.05);
+    background-color: rgba(2, 132, 199, 0.04);
 }
 
 /* Buttons */
@@ -106,7 +191,7 @@
 }
 
 .md-button--primary:hover {
-    background-color: #4ea896;
+    background-color: var(--apitomy-codegen-light);
 }
 
 /* Search */
@@ -120,7 +205,7 @@
 
 /* Footer */
 .md-footer {
-    background-color: var(--apitomy-navy);
+    background-color: var(--apitomy-bg-dark);
 }
 
 .md-footer-meta {
@@ -137,152 +222,51 @@
     color: var(--apitomy-codegen);
 }
 
-/* Custom branding for homepage hero */
+/* Headings */
 .md-typeset h1 {
-    color: var(--apitomy-navy);
-    font-weight: 500;
+    color: var(--apitomy-text);
+    font-weight: 700;
 }
 
 .md-typeset h2 {
-    color: var(--apitomy-navy);
+    color: var(--apitomy-text);
     border-bottom: 2px solid var(--apitomy-codegen);
     padding-bottom: 0.3em;
 }
 
-/* Code highlighting adjustments */
-.highlight .hll { background-color: rgba(95, 186, 167, 0.2); }
-.highlight .c { color: var(--apitomy-grey-medium); }
-.highlight .s { color: var(--apitomy-accent); }
-.highlight .p { color: #ccc; }
-.highlight .o { color: #ccc; }
-.highlight .na { color: var(--apitomy-codegen); }
-.highlight .n { color: #00b0ff; }
-.highlight .kc { color: #00c753; }
-.highlight .k { color: #00c753; }
-.highlight .c1 { color: #8d9298; }
+/* Code highlighting */
+.highlight .hll { background-color: rgba(2, 132, 199, 0.15); }
+.highlight .c { color: var(--apitomy-text-light); }
+.highlight .s { color: #F59E0B; }
+.highlight .p { color: #CBD5E1; }
+.highlight .o { color: #CBD5E1; }
+.highlight .na { color: var(--apitomy-codegen-light); }
+.highlight .n { color: #38BDF8; }
+.highlight .kc { color: #34D399; }
+.highlight .k { color: #34D399; }
+.highlight .c1 { color: #64748B; }
 
-/* Custom content blocks */
+/* Tabs */
 .md-typeset .tabbed-set > input:checked + label {
     border-color: var(--apitomy-codegen);
     color: var(--apitomy-codegen);
 }
 
-/* Scrollbar customization */
+/* Scrollbar */
 .md-sidebar__scrollwrap::-webkit-scrollbar-thumb {
     background-color: var(--apitomy-codegen);
 }
 
-/* Navigation icons */
+/* Nav icons */
 .md-nav__icon {
     color: var(--apitomy-codegen);
 }
 
-/* Back to top button */
+/* Back to top */
 .md-top {
     background-color: var(--apitomy-codegen);
 }
 
 .md-top:hover {
-    background-color: var(--apitomy-red);
-}
-
-/* ============================================================================
-   Apitomy Masthead
-   ============================================================================ */
-
-.md-banner {
-    all: unset;           /* resets almost everything */
-    display: block;       /* set sensible default */
-    box-sizing: border-box; /* makes width/padding predictable */
-
-    /* optional sane defaults */
-    font: inherit;        /* inherit font from nearest parent */
-    color: inherit;       /* inherit text color */
-    line-height: normal;
-    margin: 0;
-    padding: 0;
-    border: none;
-    background: none;
-    text-decoration: none;
-}
-
-.md-banner, .md-banner > div {
-    width: 100%;
-    height: 96px;
-    margin: 0;
-    padding: 0;
-    max-width: 100%;
-}
-
-.masthead-container {
-
-    width: 100%;
-    background-color: rgb(35, 31, 32);
-    height: 96px;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-
-    .masthead {
-
-        width: 1180px;
-        height: 96px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        @media screen and (max-width: 1024px) {
-        }
-
-        .logo {
-            width: 294px;
-            flex-shrink: 0;
-            margin-right: 20px;
-
-            img {
-                margin-top: 8px;
-            }
-        }
-
-        .main-nav {
-            flex: 1;
-
-            .menu {
-                display: flex;
-                justify-content: flex-end;
-                list-style: none;
-                margin: 0;
-                padding: 0;
-                gap: 10px;
-
-                li {
-                    margin: 0 0 0 8px;
-
-                    a {
-                        font-family: "Open Sans", Helvetica, Arial, sans-serif;
-                        font-feature-settings: unset;
-                        font-size: 15px;
-                        text-transform: uppercase;
-                        color: white !important;
-                        font-weight: 500;
-                        text-decoration: none;
-                        cursor: pointer;
-                    }
-                    a.active {
-                        font-weight: 800;
-                        color: rgb(242, 131, 107) !important;
-                        letter-spacing: -0.25px;
-                    }
-                }
-
-                li.nav-divider {
-                    border-left: 1px solid #ccc;
-                }
-
-            }
-
-        }
-
-    }
-
+    background-color: var(--apitomy-accent);
 }
