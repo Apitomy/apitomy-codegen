@@ -11,8 +11,6 @@
     --apitomy-accent-dark: #9A3412;
     --apitomy-primary: #4338CA;
     --apitomy-primary-light: #6366F1;
-    --apitomy-codegen: #0284C7;
-    --apitomy-codegen-light: #38BDF8;
     --apitomy-text: #1E293B;
     --apitomy-text-light: #64748B;
     --apitomy-border: #E2E8F0;
@@ -21,8 +19,8 @@
     --md-primary-fg-color: var(--apitomy-bg-dark);
     --md-primary-fg-color--light: #1E293B;
     --md-primary-fg-color--dark: #020617;
-    --md-accent-fg-color: var(--apitomy-codegen);
-    --md-accent-fg-color--transparent: rgba(2, 132, 199, 0.1);
+    --md-accent-fg-color: var(--project-color);
+    --md-accent-fg-color--transparent: color-mix(in srgb, var(--project-color) 10%, transparent);
 
     --md-text-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
                      "Helvetica Neue", Arial, sans-serif;
@@ -141,7 +139,7 @@
 }
 
 .md-tabs__link--active {
-    color: var(--apitomy-codegen-light);
+    color: var(--project-color-light);
 }
 
 .md-nav--primary .md-nav__title {
@@ -150,7 +148,7 @@
 
 /* Links */
 .md-typeset a {
-    color: var(--apitomy-codegen);
+    color: var(--project-color);
 }
 
 .md-typeset a:hover {
@@ -159,7 +157,7 @@
 
 /* Code blocks */
 .md-typeset code {
-    background-color: rgba(2, 132, 199, 0.08);
+    background-color: color-mix(in srgb, var(--project-color) 8%, transparent);
     border-radius: 4px;
 }
 
@@ -174,12 +172,12 @@
 /* Admonitions */
 .md-typeset .admonition,
 .md-typeset details {
-    border-left: 4px solid var(--apitomy-codegen);
+    border-left: 4px solid var(--project-color);
 }
 
 .md-typeset .admonition-title,
 .md-typeset summary {
-    background-color: rgba(2, 132, 199, 0.08);
+    background-color: color-mix(in srgb, var(--project-color) 8%, transparent);
 }
 
 /* Tables */
@@ -189,23 +187,23 @@
 }
 
 .md-typeset table:not([class]) tr:hover {
-    background-color: rgba(2, 132, 199, 0.04);
+    background-color: color-mix(in srgb, var(--project-color) 4%, transparent);
 }
 
 /* Buttons */
 .md-button {
-    color: var(--apitomy-codegen);
-    border-color: var(--apitomy-codegen);
+    color: var(--project-color);
+    border-color: var(--project-color);
 }
 
 .md-button--primary {
-    background-color: var(--apitomy-codegen);
-    border-color: var(--apitomy-codegen);
+    background-color: var(--project-color);
+    border-color: var(--project-color);
     color: white;
 }
 
 .md-button--primary:hover {
-    background-color: var(--apitomy-codegen-light);
+    background-color: var(--project-color-light);
 }
 
 /* Search */
@@ -228,12 +226,12 @@
 
 /* Sidebar navigation */
 .md-nav__link--active {
-    color: var(--apitomy-codegen);
+    color: var(--project-color);
     font-weight: 500;
 }
 
 .md-nav__link:hover {
-    color: var(--apitomy-codegen);
+    color: var(--project-color);
 }
 
 /* Headings */
@@ -244,17 +242,17 @@
 
 .md-typeset h2 {
     color: var(--apitomy-text);
-    border-bottom: 2px solid var(--apitomy-codegen);
+    border-bottom: 2px solid var(--project-color);
     padding-bottom: 0.3em;
 }
 
 /* Code highlighting */
-.highlight .hll { background-color: rgba(2, 132, 199, 0.15); }
+.highlight .hll { background-color: color-mix(in srgb, var(--project-color) 15%, transparent); }
 .highlight .c { color: var(--apitomy-text-light); }
 .highlight .s { color: #F59E0B; }
 .highlight .p { color: #CBD5E1; }
 .highlight .o { color: #CBD5E1; }
-.highlight .na { color: var(--apitomy-codegen-light); }
+.highlight .na { color: var(--project-color-light); }
 .highlight .n { color: #38BDF8; }
 .highlight .kc { color: #34D399; }
 .highlight .k { color: #34D399; }
@@ -262,23 +260,23 @@
 
 /* Tabs */
 .md-typeset .tabbed-set > input:checked + label {
-    border-color: var(--apitomy-codegen);
-    color: var(--apitomy-codegen);
+    border-color: var(--project-color);
+    color: var(--project-color);
 }
 
 /* Scrollbar */
 .md-sidebar__scrollwrap::-webkit-scrollbar-thumb {
-    background-color: var(--apitomy-codegen);
+    background-color: var(--project-color);
 }
 
 /* Nav icons */
 .md-nav__icon {
-    color: var(--apitomy-codegen);
+    color: var(--project-color);
 }
 
 /* Back to top */
 .md-top {
-    background-color: var(--apitomy-codegen);
+    background-color: var(--project-color);
 }
 
 .md-top:hover {

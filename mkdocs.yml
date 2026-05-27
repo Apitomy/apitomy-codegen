@@ -59,4 +59,5 @@ extra:
       link: https://twitter.com/apitomy
 
 extra_css:
-  - theme/css/apitomy-custom.css
+  - theme/css/project-colors.css
+  - theme/css/apitomy-base.css
