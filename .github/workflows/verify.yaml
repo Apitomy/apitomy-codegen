@@ -19,7 +19,7 @@ on:
 
 jobs:
   build-verify:
-    name: Verify Build
+    name: Verify Build (${{ matrix.java-version }})
     runs-on: ubuntu-latest
     if: github.repository_owner == 'Apitomy'
     strategy:
