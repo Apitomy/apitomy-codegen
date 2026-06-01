@@ -1,117 +1,25 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
-  "enabledManagers": [
-    "maven"
-  ],
-  "dependencyDashboard": true,
-  "rangeStrategy": "bump",
-  "ignorePaths": [
-    "maven-plugin-tests/src/it/**",
-    "maven-plugin-tests/target/**",
-    "core/src/**"
-  ],
-  "prConcurrentLimit": 5,
-  "prHourlyLimit": 5,
-  "packageRules": [
-    {
-      "groupName": "Dependencies: All",
-      "matchFileNames": [
-        "**/pom.xml"
-      ],
-      "enabled": true,
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ]
-    },
-    {
-      "groupName": "Dependencies: All (major)",
-      "matchFileNames": [
-        "**/pom.xml"
-      ],
-      "enabled": true,
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "schedule": [ "* 0 1 * *" ]
-    },
-    {
-      "groupName": "Dependencies: Maven Plugins",
-      "matchFileNames": [
-        "**/pom.xml"
-      ],
-      "matchPackageNames": [
-        "org.apache.maven*:*"
-      ],
-      "enabled": true,
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ]
-    },
-    {
-      "groupName": "Dependencies: Jackson",
-      "matchFileNames": [
-        "**/pom.xml"
-      ],
-      "matchPackageNames": [
-        "com.fasterxml.jackson*:*"
-      ],
-      "enabled": true,
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ]
-    },
-    {
-      "groupName": "Dependencies: Commons",
-      "matchFileNames": [
-        "**/pom.xml"
-      ],
-      "matchPackageNames": [
-        "*commons*:*"
-      ],
-      "enabled": true,
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ]
-    },
-    {
-      "groupName": "Dependencies: Quarkus",
-      "matchFileNames": [
-        "**/pom.xml"
-      ],
-      "matchPackageNames": [
-        "*quarkus*:*"
-      ],
-      "enabled": true,
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ]
-    },
-    {
-      "groupName": "Dependencies: Apitomy Data Models (external)",
-      "matchFileNames": [
-        "**/pom.xml"
-      ],
-      "matchPackageNames": [
-        "io.apitomy:*"
-      ]
-    },
-    {
-      "groupName": "Dependencies: Roaster (disabled)",
-      "matchFileNames": [
-        "**/pom.xml"
-      ],
-      "matchPackageNames": [
-        "org.jboss.forge.roaster:*"
-      ],
-      "enabled": false
-    }
-  ]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended",
+        "group:monorepos",
+        "group:recommended"
+    ],
+    "enabledManagers": [
+        "maven"
+    ],
+    "dependencyDashboard": true,
+    "rangeStrategy": "bump",
+    "ignorePaths": [
+    ],
+    "prConcurrentLimit": 10,
+    "prHourlyLimit": 5,
+    "packageRules": [
+        {
+            "description": "Group all major updates into a single monthly PR",
+            "matchUpdateTypes": ["major"],
+            "groupName": "all major dependencies",
+            "schedule": ["on the first day of the month"]
+        }
+    ]
 }
