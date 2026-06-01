@@ -167,4 +167,5 @@ This project is licensed under the [Apache License 2.0](LICENSE).
 
 ---
 
-*Developed by Red Hat as part of the Apitomy project.*
+*Part of the [Apitomy](https://www.apitomy.io) project. Licensed under the
+[Apache License 2.0](LICENSE).*
