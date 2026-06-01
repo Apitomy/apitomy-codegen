@@ -1,3 +1,5 @@
+[![Verify Build Workflow](https://github.com/Apitomy/apitomy-codegen/actions/workflows/verify.yaml/badge.svg)](https://github.com/Apitomy/apitomy-codegen/actions/workflows/verify.yaml?query=branch%3Amain)
+
 # Apitomy Codegen
 
 **Open Source API Design Code Generator**
