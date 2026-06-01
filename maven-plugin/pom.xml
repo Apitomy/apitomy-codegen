@@ -15,7 +15,7 @@
     <name>apitomy-codegen-cli</name>
     
     <properties>
-    	<maven.version>3.9.15</maven.version>
+    	<maven.version>3.9.16</maven.version>
     	<maven-annotations.version>3.15.2</maven-annotations.version>
     </properties>
 
