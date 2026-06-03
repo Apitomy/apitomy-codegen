@@ -59,11 +59,26 @@ class OpenApi2TestBase {
                         System.out.println("-----");
                     }
 
-                    Assert.assertEquals("Expected vs. actual failed for entry: " + name, normalizeLines(expected), normalizeLines(actual));
+                    Assert.assertEquals("Expected vs. actual failed for entry: " + name, normalizeJdkVersion(normalizeLines(expected), name), normalizeLines(actual));
                 }
                 zipEntry = zipInputStream.getNextEntry();
             }
         }
+    }
+
+    private static String normalizeJdkVersion(String content, String fileName) {
+        String jdkVersion = String.valueOf(Runtime.version().major());
+        if (fileName.endsWith("pom.xml")) {
+            content = content.replaceAll(
+                    "(<maven\\.compiler\\.release>)\\d+(</maven\\.compiler\\.release>)",
+                    "$1" + jdkVersion + "$2");
+        }
+        if (fileName.startsWith("src/main/docker/Dockerfile")) {
+            content = content.replaceAll(
+                    "openjdk-\\d+-runtime",
+                    "openjdk-" + jdkVersion + "-runtime");
+        }
+        return content;
     }
 
     private static String normalizeLines(String value) {
