@@ -22,7 +22,7 @@ Inventory is comprised of a collection of sources, which are used to generate a 
         <version.jakarta.validation-jakarta.validation-api>3.1.1</version.jakarta.validation-jakarta.validation-api>
         <version.jakarta.enterprise-jakarta.enterprise.cdi-api>4.1.0</version.jakarta.enterprise-jakarta.enterprise.cdi-api>
         <version.com.fasterxml.jackson.annotations>2.22</version.com.fasterxml.jackson.annotations>
-        <version.org.eclipse.microprofile.openapi-microprofile-openapi-api>4.0.2</version.org.eclipse.microprofile.openapi-microprofile-openapi-api>
+        <version.org.eclipse.microprofile.openapi-microprofile-openapi-api>4.1.1</version.org.eclipse.microprofile.openapi-microprofile-openapi-api>
     </properties>
 
     <dependencies>
