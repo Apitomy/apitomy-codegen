@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-REQUIRED_JAVA_MAJOR=11
+REQUIRED_JAVA_MAJOR=17
 
 JAVA_MAJOR=$(java -version 2>&1 | head -1 | sed 's/.*"\([0-9]*\)\..*/\1/')
 if [ "$JAVA_MAJOR" -lt "$REQUIRED_JAVA_MAJOR" ]; then

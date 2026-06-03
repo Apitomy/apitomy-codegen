@@ -200,8 +200,8 @@
                             <outputDirectory>${project.build.outputDirectory}/io/apitomy/hub/api/codegen</outputDirectory>
                             <noCode>true</noCode>
                             <extensions>
-                                <extension>resteasy-reactive</extension>
-                                <extension>resteasy-jackson</extension>
+                                <extension>rest</extension>
+                                <extension>rest-jackson</extension>
                                 <extension>hibernate-validator</extension>
                                 <extension>smallrye-openapi</extension>
                             </extensions>

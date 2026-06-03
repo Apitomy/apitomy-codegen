@@ -67,9 +67,7 @@ public class OpenApi2Quarkus extends OpenApi2JaxRs {
             zipOutput.closeEntry();
 
             log.append("Generating project files\r\n");
-            writeEntry(zipOutput, ".mvn/wrapper/.gitignore");
             writeEntry(zipOutput, ".mvn/wrapper/maven-wrapper.properties");
-            writeEntry(zipOutput, ".mvn/wrapper/MavenWrapperDownloader.java");
             writeEntry(zipOutput, ".dockerignore");
             writeEntry(zipOutput, ".gitignore");
             writeEntry(zipOutput, "mvnw");
