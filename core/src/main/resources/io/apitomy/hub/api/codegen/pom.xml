@@ -19,7 +19,7 @@
         <version.jakarta.ws.rs-jakarta.ws.rs-api>3.1.0</version.jakarta.ws.rs-jakarta.ws.rs-api>
         <version.jakarta.validation-jakarta.validation-api>3.1.1</version.jakarta.validation-jakarta.validation-api>
         <version.jakarta.enterprise-jakarta.enterprise.cdi-api>4.1.0</version.jakarta.enterprise-jakarta.enterprise.cdi-api>
-        <version.com.fasterxml.jackson>2.15.1</version.com.fasterxml.jackson>
+        <version.com.fasterxml.jackson.annotations>2.22</version.com.fasterxml.jackson.annotations>
         <version.org.eclipse.microprofile.openapi-microprofile-openapi-api>4.0.2</version.org.eclipse.microprofile.openapi-microprofile-openapi-api>
     </properties>
 
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${version.com.fasterxml.jackson}</version>
+            <version>${version.com.fasterxml.jackson.annotations}</version>
         </dependency>
         <!-- Specification Dependencies -->
         <dependency>
