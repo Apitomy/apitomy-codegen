@@ -105,6 +105,26 @@ public class OpenApi2JaxRsTest extends OpenApi2TestBase {
         doFullTest("OpenApi2JaxRsTest/beer-api.json", UpdateOnly.no, Reactive.yes, "_expected-reactive-full/generated-api", false);
     }
 
+    /**
+     * Test method for {@link io.apitomy.hub.api.codegen.OpenApi2JaxRs#generate()}.
+     */
+    @Test
+    public void testGenerateFullGenericReturnType() throws IOException {
+        doFullTest("OpenApi2JaxRsTest/beer-api.json", UpdateOnly.no, Reactive.no, false,
+                "_expected-genericReturnType-full/generated-api", "", "",
+                "org.jboss.resteasy.reactive.RestResponse", false);
+    }
+
+    /**
+     * Test method for {@link io.apitomy.hub.api.codegen.OpenApi2JaxRs#generate()}.
+     */
+    @Test
+    public void testGenerateFullGenericReturnTypeReactive() throws IOException {
+        doFullTest("OpenApi2JaxRsTest/beer-api.json", UpdateOnly.no, Reactive.yes, false,
+                "_expected-genericReturnTypeReactive-full/generated-api", "", "",
+                "org.jboss.resteasy.reactive.RestResponse", false);
+    }
+
     @Test
     public void testGenerateFullReactiveWithPrimitives() throws IOException {
         doFullTest("OpenApi2JaxRsTest/reactive-with-primitives.json", UpdateOnly.no, Reactive.yes, "_expected-reactive-with-primitives/generated-api", false);
@@ -307,31 +327,25 @@ public class OpenApi2JaxRsTest extends OpenApi2TestBase {
 
     /**
      * Shared test method.
-     * @param apiDef
-     * @param updateOnly
-     * @param reactive
-     * @param expectedFilesPath
-     * @param debug
-     * @throws IOException
      */
     private void doFullTest(String apiDef, UpdateOnly updateOnly, Reactive reactive, String expectedFilesPath, boolean debug) throws IOException {
-        doFullTest(apiDef, updateOnly, reactive, false, expectedFilesPath, "", "", debug);
+        doFullTest(apiDef, updateOnly, reactive, false, expectedFilesPath, "", "", null, debug);
     }
 
     /**
      * Shared test method.
-     * @param apiDef
-     * @param updateOnly
-     * @param reactive
-     * @param generateCLiGenCI
-     * @param expectedFilesPath
-     * @param namePrefix
-     * @param nameSuffix
-     * @param debug
-     * @throws IOException
      */
     private void doFullTest(String apiDef, UpdateOnly updateOnly, Reactive reactive, boolean generateCLiGenCI,
             String expectedFilesPath, String namePrefix, String nameSuffix, boolean debug) throws IOException {
+        doFullTest(apiDef, updateOnly, reactive, generateCLiGenCI, expectedFilesPath, namePrefix, nameSuffix, null, debug);
+    }
+
+    /**
+     * Shared test method.
+     */
+    private void doFullTest(String apiDef, UpdateOnly updateOnly, Reactive reactive, boolean generateCLiGenCI,
+            String expectedFilesPath, String namePrefix, String nameSuffix, String genericReturnType,
+            boolean debug) throws IOException {
         JaxRsProjectSettings settings = new JaxRsProjectSettings();
         settings.codeOnly = false;
         settings.reactive = reactive == Reactive.yes;
@@ -341,6 +355,7 @@ public class OpenApi2JaxRsTest extends OpenApi2TestBase {
         settings.javaPackage = "org.example.api";
         settings.classNamePrefix = namePrefix;
         settings.classNameSuffix = nameSuffix;
+        settings.genericReturnType = genericReturnType;
 
         OpenApi2JaxRs generator = new OpenApi2JaxRs();
         generator.setSettings(settings);

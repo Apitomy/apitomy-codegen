@@ -1,0 +1,381 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Beer API",
+        "version": "1.0.0",
+        "description": "The official Beer API!  Search for both beers and breweries.",
+        "license": {
+            "name": "Apache 2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0"
+        }
+    },
+    "paths": {
+        "/beers/{beerId}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Beer"
+                                }
+                            }
+                        },
+                        "description": "A single beer."
+                    }
+                },
+                "operationId": "getBeer",
+                "summary": "Get Info About a Beer",
+                "description": "Returns full information about a single beer."
+            },
+            "put": {
+                "requestBody": {
+                    "description": "Updated beer information.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Beer"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "202": {
+                        "description": "The beer was updated."
+                    }
+                },
+                "operationId": "updateBeer",
+                "summary": "Update a Beer",
+                "description": "Updates information about a single beer."
+            },
+            "delete": {
+                "responses": {
+                    "204": {
+                        "description": "The beer was deleted."
+                    }
+                },
+                "operationId": "deleteBeer",
+                "summary": "Delete a Beer",
+                "description": "Removes a single beer from the data set."
+            },
+            "parameters": [
+                {
+                    "name": "beerId",
+                    "description": "Unique ID of a beer.",
+                    "schema": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "in": "path",
+                    "required": true,
+                    "x-codegen-annotations": [
+                        "@jakarta.validation.constraints.Positive(message = \"The beerId must be a natural number!\")"
+                    ]
+                }
+            ]
+        },
+        "/breweries": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "uniqueItems": true,
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Brewery"
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Returns all breweries."
+                    }
+                },
+                "operationId": "listAllBreweries",
+                "summary": "Get All Breweries",
+                "description": "Returns a list of all the breweries."
+            },
+            "post": {
+                "requestBody": {
+                    "description": "New brewery information.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Brewery"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Brewery successfully added."
+                    }
+                },
+                "operationId": "addBrewery",
+                "summary": "Add a Brewery",
+                "description": "Adds a single brewery to the data set."
+            }
+        },
+        "/breweries/{breweryId}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Brewery"
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "getBrewery",
+                "summary": "Gets Info About a Brewery",
+                "description": "Returns full information about a single brewery."
+            },
+            "put": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Brewery"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "202": {}
+                },
+                "operationId": "updateBrewery",
+                "summary": "Update a Brewery",
+                "description": "Updates information about a single brewery."
+            },
+            "delete": {
+                "responses": {
+                    "204": {}
+                },
+                "operationId": "deleteBrewery",
+                "summary": "Delete a Brewery",
+                "description": "Removes a single brewery from the data set."
+            },
+            "parameters": [
+                {
+                    "name": "breweryId",
+                    "description": "Unique ID of a brewery.",
+                    "schema": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/breweries/{breweryId}/beers": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Beer"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "listBreweryBeers",
+                "summary": "Gets Beers From a Brewery",
+                "description": "Returns all of the beers made by the brewery."
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Beer"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {}
+                },
+                "operationId": "addBeerToBrewery",
+                "summary": "Adds a Beer to the Brewery",
+                "description": "Adds a single beer to the data set for this brewery.",
+                "x-codegen-async": false
+            },
+            "parameters": [
+                {
+                    "name": "breweryId",
+                    "schema": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/beers": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Beer"
+                                    }
+                                }
+                            }
+                        },
+                        "description": "All the beers!"
+                    }
+                },
+                "operationId": "listAllBeers",
+                "summary": "Get All Beers",
+                "description": "Returns all of the beers in the database."
+            },
+            "post": {
+                "requestBody": {
+                    "description": "The beer to add to the data set.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Beer"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "The beer was added."
+                    }
+                },
+                "operationId": "addBeer",
+                "summary": "Add a Beer",
+                "description": "Adds a single beer to the dataset."
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Beer": {
+                "title": "Root Type for Beer",
+                "description": "The root of the Beer type's schema.",
+                "required": [
+                    "abv",
+                    "id",
+                    "name",
+                    "style",
+                    "breweryId",
+                    "ounces"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "abv": {
+                        "format": "double",
+                        "type": "number"
+                    },
+                    "ibu": {
+                        "format": "double",
+                        "type": "number"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "style": {
+                        "type": "string"
+                    },
+                    "breweryId": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "ounces": {
+                        "format": "double",
+                        "type": "number"
+                    }
+                }
+            },
+            "Brewery": {
+                "title": "Root Type for Brewery",
+                "description": "The root of the Brewery type's schema.",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "city": {
+                        "type": "string"
+                    },
+                    "state": {
+                        "type": "string"
+                    },
+                    "sampleBeers": {
+                        "description": "",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Beer"
+                        }
+                    }
+                },
+                "example": {
+                    "id": 92,
+                    "name": "some text",
+                    "city": "some text",
+                    "state": "some text",
+                    "sampleBeers": [
+                        {
+                            "id": 16,
+                            "abv": 47.81,
+                            "ibu": 57.48,
+                            "name": "some text",
+                            "style": "some text",
+                            "breweryId": 44,
+                            "ounces": 72.8
+                        },
+                        {
+                            "id": 72,
+                            "abv": 59.7,
+                            "ibu": 47.07,
+                            "name": "some text",
+                            "style": "some text",
+                            "breweryId": 99,
+                            "ounces": 34.92
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "beer",
+            "description": ""
+        },
+        {
+            "name": "brewery",
+            "description": ""
+        }
+    ]
+}

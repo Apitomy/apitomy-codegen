@@ -33,6 +33,7 @@ public class JaxRsProjectSettings {
     public String javaPackage = "org.example.api";
     public String classNamePrefix = "";
     public String classNameSuffix = "";
+    public String genericReturnType = null;
     protected boolean useJsr303 = false;
     protected boolean generateBuilders = false;
     protected boolean generatesOpenApi = true;
@@ -170,6 +171,14 @@ public class JaxRsProjectSettings {
 
     public void setClassNameSuffix(String classNameSuffix) {
         this.classNameSuffix = classNameSuffix;
+    }
+
+    public String getGenericReturnType() {
+        return genericReturnType;
+    }
+
+    public void setGenericReturnType(String genericReturnType) {
+        this.genericReturnType = genericReturnType;
     }
 
     public boolean isUseJsr303() {
