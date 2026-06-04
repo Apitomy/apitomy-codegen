@@ -43,7 +43,12 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - User Guide:
-    - user-guide/index.md
+    - Overview: user-guide/index.md
+    - Maven Plugin: user-guide/maven-plugin.md
+    - Configuration Reference: user-guide/configuration-reference.md
+    - OpenAPI Extensions: user-guide/openapi-extensions.md
+    - Generated Output: user-guide/generated-output.md
+    - Examples: user-guide/examples.md
 
 docs_dir: ./docs
 site_dir: ./site

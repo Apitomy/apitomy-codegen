@@ -1,70 +1,276 @@
 # Getting Started
 
-This guide will help you get up and running with Apitomy Codegen in just a few minutes.
+This guide walks you through generating Java code from an OpenAPI specification using the Apitomy Codegen Maven plugin.
 
 ## Prerequisites
 
-Before you begin, ensure you have:
+- **Java 11 or later** (tested with Java 11, 17, and 21)
+- **Maven 3.6+**
 
-- **Java 11 or later** installed
-- **Maven 3.6+** for building projects
-- **An OpenAPI specification** (we'll provide a simple example)
+## Step 1: Write an OpenAPI Specification
 
-## Hello World Example
+Create a file called `src/main/resources/openapi.json`:
 
-Let's create a simple "Hello World" API and generate code from it.
-
-### Step 1: Create a Simple OpenAPI Specification
-
-Create a file called `hello-api.yaml`:
-
-```yaml
-openapi: 3.0.3
-info:
-  title: Hello World API
-  description: A simple Hello World API
-  version: 1.0.0
-servers:
-  - url: http://localhost:8080
-    description: Development server
-paths:
-  /hello:
-    get:
-      summary: Say hello
-      operationId: sayHello
-      parameters:
-        - name: name
-          in: query
-          required: false
-          schema:
-            type: string
-            default: "World"
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Greeting'
-components:
-  schemas:
-    Greeting:
-      type: object
-      properties:
-        message:
-          type: string
-          example: "Hello, World!"
-        timestamp:
-          type: string
-          format: date-time
-      required:
-        - message
-        - timestamp
+```json
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Beer API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/beers": {
+      "get": {
+        "operationId": "listBeers",
+        "summary": "List all beers",
+        "responses": {
+          "200": {
+            "description": "A list of beers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Beer" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "addBeer",
+        "summary": "Add a beer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Beer" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Beer created" }
+        }
+      }
+    },
+    "/beers/{beerId}": {
+      "get": {
+        "operationId": "getBeer",
+        "summary": "Get a beer by ID",
+        "parameters": [
+          {
+            "name": "beerId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single beer",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Beer" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Beer": {
+        "type": "object",
+        "required": ["name", "style"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "style": { "type": "string" },
+          "abv": { "type": "number", "format": "double" }
+        }
+      }
+    }
+  }
+}
 ```
 
-### Step 2: Set Up Maven Project
+## Step 2: Add the Maven Plugin
 
-Create a new Maven project with the following `pom.xml`:
+Add the Apitomy Codegen plugin to your `pom.xml`:
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>io.apitomy</groupId>
+            <artifactId>apitomy-codegen-maven-plugin</artifactId>
+            <version>1.3.0</version>
+            <executions>
+                <execution>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>generate</goal>
+                    </goals>
+                    <configuration>
+                        <projectSettings>
+                            <javaPackage>com.example.beer</javaPackage>
+                        </projectSettings>
+                        <inputSpec>src/main/resources/openapi.json</inputSpec>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+```
+
+You'll also need these dependencies for the generated code to compile:
+
+```xml
+<dependencies>
+    <!-- JAX-RS API -->
+    <dependency>
+        <groupId>jakarta.ws.rs</groupId>
+        <artifactId>jakarta.ws.rs-api</artifactId>
+        <version>4.0.0</version>
+        <scope>provided</scope>
+    </dependency>
+
+    <!-- Jackson annotations (used by generated beans) -->
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.18.0</version>
+    </dependency>
+
+    <!-- MicroProfile OpenAPI annotations (used by generated interfaces) -->
+    <dependency>
+        <groupId>org.eclipse.microprofile.openapi</groupId>
+        <artifactId>microprofile-openapi-api</artifactId>
+        <version>4.0</version>
+        <scope>provided</scope>
+    </dependency>
+
+    <!-- Bean Validation API (for @NotNull on request bodies) -->
+    <dependency>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>3.1.0</version>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+```
+
+!!! tip "Using Quarkus?"
+    If you're using Quarkus, these dependencies are already managed by the Quarkus BOM. See [Using with Quarkus](#using-with-quarkus) below.
+
+## Step 3: Generate Code
+
+```bash
+mvn clean generate-sources
+```
+
+The plugin generates code into `target/generated-sources/jaxrs/` and automatically registers it as a compile source root:
+
+```
+target/generated-sources/jaxrs/
+└── com/example/beer/
+    ├── BeersResource.java          # JAX-RS interface
+    └── beans/
+        └── Beer.java               # Data model bean
+```
+
+### Generated Interface
+
+The generated `BeersResource.java` is a JAX-RS **interface** with all the annotations and method signatures derived from your OpenAPI spec:
+
+```java
+@Path("/beers")
+public interface BeersResource {
+
+    @Operation(summary = "List all beers", operationId = "listBeers")
+    @GET
+    @Produces("application/json")
+    List<Beer> listBeers();
+
+    @Operation(summary = "Add a beer", operationId = "addBeer")
+    @POST
+    @Consumes("application/json")
+    void addBeer(@NotNull Beer data);
+
+    @Operation(summary = "Get a beer by ID", operationId = "getBeer")
+    @Path("/{beerId}")
+    @GET
+    @Produces("application/json")
+    Beer getBeer(@PathParam("beerId") int beerId);
+}
+```
+
+### Generated Bean
+
+The `Beer.java` bean class includes Jackson annotations for JSON serialization:
+
+```java
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({"id", "name", "style", "abv"})
+@Generated("jsonschema2pojo")
+public class Beer {
+
+    @JsonProperty("id")
+    private Integer id;
+
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("style")
+    private String style;
+
+    @JsonProperty("abv")
+    private Double abv;
+
+    // Getters and setters...
+}
+```
+
+## Step 4: Implement the Interface
+
+Create an implementation class that implements the generated interface:
+
+```java
+package com.example.beer;
+
+import com.example.beer.beans.Beer;
+import java.util.*;
+
+public class BeersResourceImpl implements BeersResource {
+
+    private final Map<Integer, Beer> beers = new LinkedHashMap<>();
+    private int nextId = 1;
+
+    @Override
+    public List<Beer> listBeers() {
+        return new ArrayList<>(beers.values());
+    }
+
+    @Override
+    public void addBeer(Beer data) {
+        data.setId(nextId++);
+        beers.put(data.getId(), data);
+    }
+
+    @Override
+    public Beer getBeer(int beerId) {
+        return beers.get(beerId);
+    }
+}
+```
+
+Your implementation handles the business logic while the generated interface handles the JAX-RS wiring — paths, HTTP methods, content types, and parameter binding are all derived from the OpenAPI spec.
+
+## Using with Quarkus
+
+Quarkus is the recommended runtime for Apitomy Codegen. Here's a minimal `pom.xml` for a Quarkus project:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -75,14 +281,13 @@ Create a new Maven project with the following `pom.xml`:
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>hello-world-api</artifactId>
+    <artifactId>beer-api</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <quarkus.platform.version>3.2.8.Final</quarkus.platform.version>
-        <apitomy-codegen.version>1.2.6.Final</apitomy-codegen.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <quarkus.platform.version>3.17.0</quarkus.platform.version>
     </properties>
 
     <dependencyManagement>
@@ -100,7 +305,19 @@ Create a new Maven project with the following `pom.xml`:
     <dependencies>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
+            <artifactId>quarkus-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
         </dependency>
     </dependencies>
 
@@ -109,19 +326,34 @@ Create a new Maven project with the following `pom.xml`:
             <plugin>
                 <groupId>io.apitomy</groupId>
                 <artifactId>apitomy-codegen-maven-plugin</artifactId>
-                <version>${apitomy-codegen.version}</version>
+                <version>1.3.0</version>
                 <executions>
                     <execution>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>hello-api.yaml</inputSpec>
-                            <output>target/generated-sources/apitomy</output>
                             <projectSettings>
-                                <javaPackage>com.example.hello</javaPackage>
+                                <javaPackage>com.example.beer</javaPackage>
                             </projectSettings>
+                            <inputSpec>src/main/resources/openapi.json</inputSpec>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.quarkus.platform</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>generate-code</goal>
+                            <goal>generate-code-tests</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -130,71 +362,35 @@ Create a new Maven project with the following `pom.xml`:
 </project>
 ```
 
-### Step 3: Generate Code
-
-Run the code generation:
-
-```bash
-mvn clean generate-sources
-```
-
-This will generate:
-
-- **JAX-RS resource interfaces** in `target/generated-sources/apitomy/`
-- **Data model classes** (`Greeting.java`)
-- **API interfaces** ready for implementation
-
-### Step 4: Implement the Generated Interface
-
-Create `src/main/java/com/example/hello/HelloResource.java`:
+Make your implementation a CDI bean:
 
 ```java
-package com.example.hello;
+package com.example.beer;
 
-import java.time.OffsetDateTime;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class HelloResource implements HelloApi {
-
-    @Override
-    public Greeting sayHello(String name) {
-        Greeting greeting = new Greeting();
-        greeting.setMessage("Hello, " + (name != null ? name : "World") + "!");
-        greeting.setTimestamp(OffsetDateTime.now());
-        return greeting;
-    }
+public class BeersResourceImpl implements BeersResource {
+    // ... implementation
 }
 ```
 
-### Step 5: Run Your Application
+Run with Quarkus dev mode:
 
 ```bash
 mvn quarkus:dev
 ```
 
-Your API is now running at `http://localhost:8080`!
-
 Test it:
-```bash
-curl "http://localhost:8080/hello?name=Developer"
-```
 
-Response:
-```json
-{
-  "message": "Hello, Developer!",
-  "timestamp": "2024-01-15T10:30:00Z"
-}
+```bash
+curl http://localhost:8080/beers
 ```
 
 ## What's Next?
 
-Now that you have a working example, explore more advanced features:
-
-- **Configuration Options** - Customize package names, add validation, etc.
-- **Multiple Output Formats** - Generate clients, async APIs, and more
-- **Integration Patterns** - Learn about different ways to integrate the generator
-- **Advanced OpenAPI Features** - Work with complex schemas, security, and more
-
-Check out the [User Guide](user-guide/) for detailed documentation on all features.
+- **[Maven Plugin Reference](user-guide/maven-plugin.md)** — all plugin configuration options
+- **[Configuration Reference](user-guide/configuration-reference.md)** — detailed documentation of all project settings
+- **[OpenAPI Extensions](user-guide/openapi-extensions.md)** — customize code generation from your API contract
+- **[Generated Output](user-guide/generated-output.md)** — understand what the generator produces
+- **[Examples](user-guide/examples.md)** — practical recipes for common use cases
