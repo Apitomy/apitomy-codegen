@@ -51,6 +51,17 @@
                 "area/dependencies",
                 "update/patch"
             ]
+        },
+        {
+            "description": "Quarkus: allow only patch updates to stay on the LTS track",
+            "matchPackagePrefixes": [
+                "io.quarkus"
+            ],
+            "allowedVersions": "~3.33",
+            "labels": [
+                "area/dependencies",
+                "update/patch"
+            ]
         }
     ]
 }
