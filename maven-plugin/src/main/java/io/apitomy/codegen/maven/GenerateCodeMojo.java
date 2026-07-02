@@ -25,7 +25,7 @@ import io.apitomy.hub.api.codegen.OpenApi2JaxRs;
  * 
  * @author eric.wittmann@gmail.com
  */
-@Mojo(name = "generate")
+@Mojo(name = "generate", threadSafe = true)
 public class GenerateCodeMojo extends AbstractMojo {
 
     /**
