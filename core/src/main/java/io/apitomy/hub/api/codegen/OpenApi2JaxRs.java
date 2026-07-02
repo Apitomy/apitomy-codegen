@@ -33,9 +33,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -109,7 +109,7 @@ import io.apitomy.hub.api.codegen.util.IndexedCodeWriter;
  */
 public class OpenApi2JaxRs {
 
-    static final Map<String, Type<?>> TYPE_CACHE = new HashMap<>();
+    static final Map<String, Type<?>> TYPE_CACHE = new ConcurrentHashMap<>();
     static final String OPENAPI_OPERATION_ANNOTATION = "org.eclipse.microprofile.openapi.annotations.Operation";
     private static final String MEDIA_TYPE_CONSTANT_PREFIX = "MediaType.";
 
