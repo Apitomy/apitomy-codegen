@@ -59,7 +59,9 @@ class OpenApi2TestBase {
                         System.out.println("-----");
                     }
 
-                    Assert.assertEquals("Expected vs. actual failed for entry: " + name, normalizeJdkVersion(normalizeLines(expected), name), normalizeLines(actual));
+                    Assert.assertEquals("Expected vs. actual failed for entry: " + name,
+                            normalizeQuarkusPlatformVersion(normalizeJdkVersion(normalizeLines(expected), name), name),
+                            normalizeQuarkusPlatformVersion(normalizeLines(actual), name));
                 }
                 zipEntry = zipInputStream.getNextEntry();
             }
@@ -77,6 +79,15 @@ class OpenApi2TestBase {
             content = content.replaceAll(
                     "openjdk-\\d+-runtime",
                     "openjdk-" + jdkVersion + "-runtime");
+        }
+        return content;
+    }
+
+    private static String normalizeQuarkusPlatformVersion(String content, String fileName) {
+        if (fileName.endsWith("pom.xml")) {
+            content = content.replaceAll(
+                    "(<quarkus.platform.version>)[^<]+(</quarkus.platform.version>)",
+                    "$1QUARKUS_VERSION$2");
         }
         return content;
     }
