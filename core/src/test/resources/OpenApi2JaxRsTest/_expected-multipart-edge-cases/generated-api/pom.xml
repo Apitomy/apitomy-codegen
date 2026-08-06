@@ -16,7 +16,7 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <version.jakarta.ws.rs-jakarta.ws.rs-api>3.1.0</version.jakarta.ws.rs-jakarta.ws.rs-api>
+        <version.jakarta.ws.rs-jakarta.ws.rs-api>4.0.0</version.jakarta.ws.rs-jakarta.ws.rs-api>
         <version.jakarta.validation-jakarta.validation-api>3.1.1</version.jakarta.validation-jakarta.validation-api>
         <version.jakarta.enterprise-jakarta.enterprise.cdi-api>4.1.0</version.jakarta.enterprise-jakarta.enterprise.cdi-api>
         <version.com.fasterxml.jackson.annotations>2.22</version.com.fasterxml.jackson.annotations>
