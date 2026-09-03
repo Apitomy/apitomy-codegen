@@ -176,6 +176,15 @@ public class OpenApi2JaxRsTest extends OpenApi2TestBase {
      * Test method for {@link io.apitomy.hub.api.codegen.OpenApi2JaxRs#generate()}.
      */
     @Test
+    public void testGenerateFull_ArrayMapInline() throws IOException {
+        doFullTest("OpenApi2JaxRsTest/array-map-inline.json", UpdateOnly.no, Reactive.no,
+                "_expected-array-map-inline/generated-api", false);
+    }
+
+    /**
+     * Test method for {@link io.apitomy.hub.api.codegen.OpenApi2JaxRs#generate()}.
+     */
+    @Test
     public void testGenerateFull_BeanAnnotations() throws IOException {
         doFullTest("OpenApi2JaxRsTest/bean-annotations.json", UpdateOnly.no, Reactive.no, "_expected-bean-annotations/generated-api", false);
     }
