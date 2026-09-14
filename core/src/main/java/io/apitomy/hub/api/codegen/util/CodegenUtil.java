@@ -102,4 +102,44 @@ public final class CodegenUtil {
 
         return Arrays.asList(values).contains(union.asString());
     }
+
+    public static String resolveJavaType(JaxRsProjectSettings settings, Document document, OpenApi31Schema schema, String defaultPackage) {
+        if (schema == null) {
+            return "java.lang.Object";
+        }
+
+        if (schema.get$ref() != null && !schema.get$ref().isBlank()) {
+            return schemaRefToFQCN(settings, document, schema.get$ref(), defaultPackage);
+        }
+
+        if (containsValue(schema.getType(), "array")) {
+            String itemType = "java.lang.Object";
+            if (schema.getItems() != null) {
+                itemType = resolveJavaType(settings, document, (OpenApi31Schema) schema.getItems(), defaultPackage);
+            }
+            return "java.util.List<" + itemType + ">";
+        }
+
+        if (containsValue(schema.getType(), "string")) {
+            return "java.lang.String";
+        }
+        if (containsValue(schema.getType(), "integer")) {
+            return "java.lang.Integer";
+        }
+        if (containsValue(schema.getType(), "number")) {
+            return "java.lang.Double";
+        }
+        if (containsValue(schema.getType(), "boolean")) {
+            return "java.lang.Boolean";
+        }
+        if (containsValue(schema.getType(), "object")) {
+            if (schema.getAdditionalProperties() != null && schema.getAdditionalProperties().isSchema()) {
+                String valueType = resolveJavaType(settings, document, (OpenApi31Schema) schema.getAdditionalProperties().asSchema(), defaultPackage);
+                return "java.util.Map<String, " + valueType + ">";
+            }
+            return "java.lang.Object";
+        }
+
+        return "java.lang.Object";
+    }
 }
