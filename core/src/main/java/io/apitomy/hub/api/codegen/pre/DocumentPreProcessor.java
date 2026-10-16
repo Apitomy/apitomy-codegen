@@ -20,6 +20,7 @@ import io.apitomy.datamodels.Library;
 import io.apitomy.datamodels.TraverserDirection;
 import io.apitomy.datamodels.models.Document;
 import io.apitomy.datamodels.models.openapi.v3x.v31.visitors.OpenApi31Visitor;
+import io.apitomy.hub.api.codegen.JaxRsProjectSettings;
 
 /**
  * Used to preprocess an OpenAPI document in a variety of ways with the intent of making the
@@ -28,27 +29,32 @@ import io.apitomy.datamodels.models.openapi.v3x.v31.visitors.OpenApi31Visitor;
  */
 public class DocumentPreProcessor {
 
-    private static OpenApi31Visitor [] processors = {
-            new OpenApiLongSimpleTypeProcessor(),
-            new OpenApiDateTimeSimpleTypeProcessor(),
-            new OpenApiByteSimpleTypeProcessor(),
-            new OpenApiMapDataTypeProcessor(),
-            new OpenApiAdditionalPropertiesDataTypeProcessor(),
-            new OpenApiTypeInliner(),
-            new OpenApiInlinedSchemaRemover(),
-            new OpenApiParameterInliner(),
-            new OpenApiInlinedParameterRemover(),
-            new OpenApiResponseInliner(),
-            new OpenApiAllOfProcessor(),
-            new OpenApiBeanClassExtendsProcessor(),
-            new OpenApiRequestBodyInliner()
-    };
+    private final JaxRsProjectSettings settings;
+
+    public DocumentPreProcessor(JaxRsProjectSettings settings) {
+        this.settings = settings;
+    }
 
     /**
      * Process the model.
      * @param document
      */
     public void process(Document document) {
+        OpenApi31Visitor[] processors = {
+                new OpenApiLongSimpleTypeProcessor(),
+                new OpenApiDateTimeSimpleTypeProcessor(),
+                new OpenApiByteSimpleTypeProcessor(),
+                new OpenApiMapDataTypeProcessor(settings, document),
+                new OpenApiAdditionalPropertiesDataTypeProcessor(),
+                new OpenApiTypeInliner(),
+                new OpenApiInlinedSchemaRemover(),
+                new OpenApiParameterInliner(),
+                new OpenApiInlinedParameterRemover(),
+                new OpenApiResponseInliner(),
+                new OpenApiAllOfProcessor(),
+                new OpenApiBeanClassExtendsProcessor(),
+                new OpenApiRequestBodyInliner()
+        };
         for (OpenApi31Visitor proc : processors) {
             Library.visitTree(document, proc, TraverserDirection.down);
         }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.example.api</groupId>
+    <artifactId>generated-api</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>array map inline api</name>
+    <description>A generated project with JAX-RS and Microprofile OpenAPI features enabled.</description>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <version.jakarta.ws.rs-jakarta.ws.rs-api>3.1.0</version.jakarta.ws.rs-jakarta.ws.rs-api>
+        <version.jakarta.validation-jakarta.validation-api>3.1.1</version.jakarta.validation-jakarta.validation-api>
+        <version.jakarta.enterprise-jakarta.enterprise.cdi-api>4.1.0</version.jakarta.enterprise-jakarta.enterprise.cdi-api>
+        <version.com.fasterxml.jackson.annotations>2.22</version.com.fasterxml.jackson.annotations>
+        <version.org.eclipse.microprofile.openapi-microprofile-openapi-api>4.1.1</version.org.eclipse.microprofile.openapi-microprofile-openapi-api>
+    </properties>
+
+    <dependencies>
+        <!-- Third Party Dependencies -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${version.com.fasterxml.jackson.annotations}</version>
+        </dependency>
+        <!-- Specification Dependencies -->
+        <dependency>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+            <version>${version.jakarta.ws.rs-jakarta.ws.rs-api}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.enterprise</groupId>
+            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+            <version>${version.jakarta.enterprise-jakarta.enterprise.cdi-api}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>${version.jakarta.validation-jakarta.validation-api}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile.openapi</groupId>
+            <artifactId>microprofile-openapi-api</artifactId>
+            <version>${version.org.eclipse.microprofile.openapi-microprofile-openapi-api}</version>
+        </dependency>
+    </dependencies>
+</project>
