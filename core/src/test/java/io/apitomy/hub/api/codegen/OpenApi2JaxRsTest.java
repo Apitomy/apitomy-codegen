@@ -164,6 +164,11 @@ public class OpenApi2JaxRsTest extends OpenApi2TestBase {
         doFullTest("OpenApi2JaxRsTest/context-root.json", UpdateOnly.no, Reactive.no, "_expected-context-root/generated-api", false);
     }
 
+    @Test
+    public void testGenerateFull_MultiFileExternalRef() throws IOException {
+        doFullTest("OpenApi2JaxRsTest/multi-file-api.json", UpdateOnly.no, Reactive.no, "_expected-multi-file/generated-api", false);
+    }
+
     /**
      * Test method for {@link io.apitomy.hub.api.codegen.OpenApi2JaxRs#generate()}.
      */
