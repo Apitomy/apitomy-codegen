@@ -1,0 +1,71 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Nullable Union Types Sample API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/items": {
+            "get": {
+                "operationId": "getItems",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": ["string", "null"]
+                        }
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": ["integer", "null"]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "createItem",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": ["object", "null"],
+                                "properties": {
+                                    "name": {
+                                        "type": ["string", "null"]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "ok"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Item": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": ["string", "null"]
+                    }
+                }
+            }
+        }
+    }
+}

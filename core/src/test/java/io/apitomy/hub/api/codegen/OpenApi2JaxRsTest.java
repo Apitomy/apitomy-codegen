@@ -293,6 +293,47 @@ public class OpenApi2JaxRsTest extends OpenApi2TestBase {
      *   - GET /products/items (no operationId, falls back to last path segment "items")
      */
     @Test
+    public void testNullableUnionTypes() throws IOException {
+        JaxRsProjectSettings settings = new JaxRsProjectSettings();
+        settings.codeOnly = false;
+        settings.reactive = false;
+        settings.artifactId = "generated-api";
+        settings.groupId = "org.example.api";
+        settings.javaPackage = "org.example.api";
+
+        OpenApi2JaxRs generator = new OpenApi2JaxRs();
+        generator.setSettings(settings);
+        generator.setUpdateOnly(false);
+        generator.setOpenApiDocument(getClass().getClassLoader().getResource(
+                "OpenApi2JaxRsTest/nullable-union-types.json"));
+
+        ByteArrayOutputStream outputStream = generator.generate();
+
+        String resourceContent = null;
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.getName().endsWith("ItemsResource.java")) {
+                    resourceContent = IOUtils.toString(zis, StandardCharsets.UTF_8);
+                    break;
+                }
+            }
+        }
+        Assert.assertNotNull(resourceContent);
+
+        // A `type: [T, "null"]` union must not leak "null" into the resolved Java type.
+        Assert.assertTrue(resourceContent.contains("String name"));
+        Assert.assertTrue(resourceContent.contains("BigInteger count"));
+
+        // Nullable query parameters must not be annotated @NotNull.
+        Assert.assertFalse(resourceContent.contains("@NotNull String name"));
+        Assert.assertFalse(resourceContent.contains("@NotNull BigInteger count"));
+
+        // Nullable request body must not be annotated @NotNull either.
+        Assert.assertFalse(resourceContent.contains("@NotNull InputStream data"));
+    }
+
+    @Test
     public void testDuplicateMethodNameDetection() throws IOException {
         JaxRsProjectSettings settings = new JaxRsProjectSettings();
         settings.codeOnly = false;
