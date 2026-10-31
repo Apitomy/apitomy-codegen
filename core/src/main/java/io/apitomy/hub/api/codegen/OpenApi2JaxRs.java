@@ -27,6 +27,8 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -98,6 +100,7 @@ import io.apitomy.hub.api.codegen.jaxrs.InterfacesVisitor;
 import io.apitomy.hub.api.codegen.jaxrs.OpenApi2CodegenVisitor;
 import io.apitomy.hub.api.codegen.post.JavaBeanPostProcessor;
 import io.apitomy.hub.api.codegen.pre.DocumentPreProcessor;
+import io.apitomy.hub.api.codegen.refs.FileReferenceResolver;
 import io.apitomy.hub.api.codegen.util.CodegenUtil;
 import io.apitomy.hub.api.codegen.util.IndexedCodeWriter;
 
@@ -120,6 +123,7 @@ public class OpenApi2JaxRs {
     protected static JavaBeanPostProcessor postProcessor = new JavaBeanPostProcessor();
 
     protected String openApiDoc;
+    protected Path openApiDocBaseDir;
     protected transient Document document;
     protected JaxRsProjectSettings settings;
     protected boolean updateOnly;
@@ -162,8 +166,26 @@ public class OpenApi2JaxRs {
      * @throws IOException
      */
     public void setOpenApiDocument(URL url) throws IOException {
+        this.openApiDocBaseDir = resolveBaseDir(url);
         try (InputStream is = url.openStream()) {
             this.setOpenApiDocument(is);
+        }
+    }
+
+    /**
+     * Determines the directory the given document URL lives in, so that relative $refs to
+     * sibling files can later be resolved against it.  Returns null for anything that isn't a
+     * local file (e.g. an http(s) URL), since cross-file resolution requires a filesystem base.
+     *
+     */
+    private static Path resolveBaseDir(URL url) {
+        if (!"file".equals(url.getProtocol())) {
+            return null;
+        }
+        try {
+            return Paths.get(url.toURI()).getParent();
+        } catch (Exception e) {
+            return null;
         }
     }
 
@@ -380,6 +402,9 @@ public class OpenApi2JaxRs {
         // If the document is OpenAPI 2.0 or 3.0, upgrade/transform it to 3.1
         document = Library.transformDocument(document, ModelType.OPENAPI31);
 
+        // Resolve any cross-file $refs (relative to the entry document's location) into this document
+        document = dereferenceExternalRefs(document);
+
         // Pre-process the document
         document = preProcess(document);
 
@@ -440,6 +465,21 @@ public class OpenApi2JaxRs {
                       .addAnnotation(String.format("%s.ws.rs.ApplicationPath", topLevelPackage))
                       .setStringValue("/")
                       .getOrigin();
+    }
+
+    /**
+     * Resolves any $refs in the document that point to another file (relative to the location
+     * of the entry document) and pulls their content into this document, so that the rest of the
+     * pipeline only ever has to deal with same-document $refs.  If the entry document's location
+     * is unknown (e.g. it was supplied as a raw String or InputStream), this is a no-op.
+     *
+     * @param document
+     */
+    protected Document dereferenceExternalRefs(Document document) {
+        if (openApiDocBaseDir == null) {
+            return document;
+        }
+        return Library.dereferenceDocument(document, new FileReferenceResolver(openApiDocBaseDir), false);
     }
 
     /**
