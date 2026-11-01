@@ -1,0 +1,182 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "map types api",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/array-maps": {
+      "post": {
+        "operationId": "createArrayMap",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WidgetsByCategory"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateArrayMap",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WidgetsByCategory"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "get": {
+        "operationId": "getArrayMap",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WidgetsByCategory"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/counts": {
+      "post": {
+        "operationId": "createCounts",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CountsByName"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/labels": {
+      "post": {
+        "operationId": "createLabels",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Labels"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/untagged": {
+      "post": {
+        "operationId": "createUntagged",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Widget": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "WidgetsByCategory": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Widget"
+          }
+        },
+        "x-codegen-type": "ArrayMap"
+      },
+      "CountsByName": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "x-codegen-type": "ArrayMap",
+        "x-codegen-inline": true
+      },
+      "Labels": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "x-codegen-type": "StringMap"
+      },
+      "Inventory": {
+        "type": "object",
+        "properties": {
+          "widgets": {
+            "$ref": "#/components/schemas/WidgetsByCategory"
+          },
+          "labels": {
+            "$ref": "#/components/schemas/Labels"
+          }
+        }
+      }
+    }
+  }
+}

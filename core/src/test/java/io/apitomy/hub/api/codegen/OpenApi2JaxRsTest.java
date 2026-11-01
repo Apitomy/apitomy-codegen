@@ -182,6 +182,17 @@ public class OpenApi2JaxRsTest extends OpenApi2TestBase {
     }
 
     /**
+     * Covers the map types (ArrayMap/StringMap) as request bodies (including multiple content types),
+     * return types and bean properties, plus an untagged inline additionalProperties body (which
+     * must still be generated as an InputStream).
+     */
+    @Test
+    public void testGenerateFull_MapTypes() throws IOException {
+        doFullTest("OpenApi2JaxRsTest/map-types.json", UpdateOnly.no, Reactive.no,
+                "_expected-map-types/generated-api", false);
+    }
+
+    /**
      * Test method for {@link io.apitomy.hub.api.codegen.OpenApi2JaxRs#generate()}.
      */
     @Test

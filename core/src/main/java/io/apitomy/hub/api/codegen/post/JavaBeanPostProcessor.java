@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import io.apitomy.hub.api.codegen.beans.CodegenBeanAnnotationDirective;
+import io.apitomy.hub.api.codegen.util.CodegenUtil;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -47,8 +48,8 @@ public class JavaBeanPostProcessor {
             content = content.replaceAll("java.lang.String", "String");
             modified = true;
         }
-        if (content.contains("APITOMY_CODEGEN_BYTE_ARRAY_REPRESENTATION")) {
-            content = content.replaceAll("APITOMY_CODEGEN_BYTE_ARRAY_REPRESENTATION", "byte[]");
+        if (content.contains(CodegenUtil.BYTE_ARRAY_REPRESENTATION)) {
+            content = content.replace(CodegenUtil.BYTE_ARRAY_REPRESENTATION, "byte[]");
             modified = true;
         }
 

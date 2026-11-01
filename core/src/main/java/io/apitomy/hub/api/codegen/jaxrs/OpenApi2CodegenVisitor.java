@@ -354,6 +354,7 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
                 if (returnType.getCollection() != null) { cgArgument.setCollection(returnType.getCollection()); }
                 if (returnType.getType() != null) { cgArgument.setType(returnType.getType()); }
                 if (returnType.getFormat() != null) { cgArgument.setFormat(returnType.getFormat()); }
+                if (returnType.getExistingJavaType() != null) { cgArgument.setExistingJavaType(returnType.getExistingJavaType()); }
 
                 clonedMethod.getArguments().add(cgArgument);
 
@@ -585,17 +586,19 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
 
         OpenApi31Schema schema31 = (OpenApi31Schema) schema;
 
-        JsonNode existingJavaType = CodegenUtil.getExtension(schema31, "existingJavaType");
-        if (existingJavaType != null && existingJavaType.isTextual()) {
-            String javaType = existingJavaType.asText();
-            target.setExistingJavaType(javaType);
-            if (javaType.startsWith("java.util.Map<")) {
-                target.setCollection("map");
-            }
-        }
-
         target.setType((List<String>) null);
         String $ref = schema31.get$ref();
+
+        // Map types (x-codegen-type StringMap/StringObjectMap/ArrayMap) are resolved to a Java map
+        // type by OpenApiMapDataTypeProcessor during pre-processing - either on the schema itself
+        // (when inlined) or on the referenced schema definition (no bean class is generated for it).
+        String mapJavaType = $ref != null
+                ? CodegenUtil.refToExistingMapType((Document) schema.root(), $ref)
+                : CodegenUtil.getExistingMapType(schema31);
+        if (mapJavaType != null) {
+            target.setExistingJavaType(mapJavaType);
+            target.setCollection("map");
+        }
 
         if ($ref != null) {
             target.setType(this.typeFromSchemaRef((Document) schema.root(), $ref));
@@ -615,11 +618,6 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
         } else if (containsValue(schema31.getType(), "object")) {
             setIfPresent(() -> toStringList(schema31.getType()), target::setType);
             setIfPresent(schema::getFormat, target::setFormat);
-            String mapJavaType = resolveMapJavaType(schema31);
-            if (mapJavaType != null) {
-                target.setExistingJavaType(mapJavaType);
-                target.setCollection("map");
-            }
         } else if (containsValue(schema31.getType(), "string")) {
             setIfPresent(() -> toStringList(schema31.getType()), target::setType);
             setIfPresent(schema::getFormat, target::setFormat);
@@ -654,29 +652,7 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
             if (defaultValue.isValueNode()) {
                 target.setDefaultValue(defaultValue.asText());
             }
-
         });
-    }
-
-    private static final Set<String> MAP_TYPE_EXTENSIONS = Set.of("ArrayMap", "StringMap", "StringObjectMap");
-
-    private String resolveMapJavaType(OpenApi31Schema schema) {
-        JsonNode typeExtension = CodegenUtil.getExtension(schema, CodegenExtensions.TYPE);
-        if (typeExtension == null || !typeExtension.isTextual() || !MAP_TYPE_EXTENSIONS.contains(typeExtension.asText())) {
-            return null;
-        }
-
-        if (schema.getAdditionalProperties() == null || !schema.getAdditionalProperties().isSchema()) {
-            JsonNode existingJavaType = CodegenUtil.getExtension(schema, "existingJavaType");
-            if (existingJavaType != null && existingJavaType.isTextual()) {
-                return existingJavaType.asText();
-            }
-            return null;
-        }
-
-        String valueType = CodegenUtil.resolveJavaType(settings, (Document) schema.root(),
-                (OpenApi31Schema) schema.getAdditionalProperties().asSchema(), this.settings.getJavaPackage() + ".beans");
-        return "java.util.Map<String, " + valueType + ">";
     }
 
     private <T> void setIfPresent(Supplier<T> source, Consumer<T> target) {

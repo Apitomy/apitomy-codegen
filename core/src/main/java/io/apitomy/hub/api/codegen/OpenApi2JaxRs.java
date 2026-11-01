@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -75,6 +74,7 @@ import org.jsonschema2pojo.SchemaMapper;
 import org.jsonschema2pojo.SchemaStore;
 import org.jsonschema2pojo.rules.Rule;
 import org.jsonschema2pojo.rules.RuleFactory;
+import org.jsonschema2pojo.util.TypeUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -113,7 +113,6 @@ public class OpenApi2JaxRs {
     static final Map<String, Type<?>> TYPE_CACHE = new ConcurrentHashMap<>();
     static final String OPENAPI_OPERATION_ANNOTATION = "org.eclipse.microprofile.openapi.annotations.Operation";
     private static final String MEDIA_TYPE_CONSTANT_PREFIX = "MediaType.";
-    private static final Set<String> HTTP_METHODS = Set.of("get", "put", "post", "delete", "options", "head", "patch", "trace");
 
     protected static ObjectMapper mapper = new ObjectMapper();
     protected static Charset utf8 = StandardCharsets.UTF_8;
@@ -125,7 +124,6 @@ public class OpenApi2JaxRs {
     protected transient Document document;
     protected JaxRsProjectSettings settings;
     protected boolean updateOnly;
-    private Map<String, String> requestBodyTypesByOperationId = Map.of();
 
     private GenerationConfig config;
 
@@ -384,7 +382,6 @@ public class OpenApi2JaxRs {
         document = Library.transformDocument(document, ModelType.OPENAPI31);
 
         // Pre-process the document
-        requestBodyTypesByOperationId = computeRequestBodyTypes(document);
         document = preProcess(document);
 
         // Figure out the breakdown of the interfaces.
@@ -646,26 +643,18 @@ public class OpenApi2JaxRs {
                 .orElseGet(Stream::empty)
                 .forEach(arg -> {
                     String methodArgName = paramNameToJavaArgName(arg.getName());
-                    Type<?> paramType = null;
+                    String defaultParamType = Object.class.getName();
 
                     if (arg.getIn().equals("body")) {
                         // Swagger 2.0?
-                        String replacementType = requestBodyTypesByOperationId.get(methodInfo.getOperationId());
-                        if (replacementType != null) {
-                            paramType = parseType(replacementType);
-                        }
+                        defaultParamType = InputStream.class.getName();
                     } else if (arg.getIn().equals("form")
                             && arg.getType() != null
                             && !arg.getType().isEmpty()) {
-                        paramType = generateTypeName(arg, arg.getRequired(), arg.getType().get(0));
+                        defaultParamType = arg.getType().get(0);
                     }
 
-                    if (paramType == null) {
-                        String defaultParamType = arg.getIn().equals("body")
-                                ? InputStream.class.getName()
-                                : Object.class.getName();
-                        paramType = generateTypeName(arg, arg.getRequired(), defaultParamType);
-                    }
+                    Type<?> paramType = generateTypeName(arg, arg.getRequired(), defaultParamType);
 
                     if (arg.getTypeSignature() != null) {
                         // TODO try to find a re-usable data type that matches the type signature
@@ -729,128 +718,6 @@ public class OpenApi2JaxRs {
         return generateJavaInterface(info, interfaceInfo, "jakarta");
     }
 
-    private Map<String, String> computeRequestBodyTypes(Document document) throws IOException {
-        JsonNode json = mapper.readTree(Library.writeDocumentToJSONString(document));
-        Map<String, String> arrayMapTypes = computeArrayMapTypes(json);
-        Map<String, String> requestBodyTypes = new HashMap<>();
-
-        JsonNode paths = json.path("paths");
-        if (!paths.isObject()) {
-            return requestBodyTypes;
-        }
-
-        paths.fields().forEachRemaining(pathEntry -> {
-            JsonNode pathItem = pathEntry.getValue();
-            pathItem.fields().forEachRemaining(methodEntry -> {
-                if (!HTTP_METHODS.contains(methodEntry.getKey())) {
-                    return;
-                }
-
-                JsonNode operation = methodEntry.getValue();
-                String operationId = textValue(operation, "operationId");
-                if (operationId == null) {
-                    return;
-                }
-
-                JsonNode requestBody = operation.path("requestBody");
-                String requestType = resolveBodyType(requestBody, arrayMapTypes);
-                if (requestType != null && requestType.startsWith("java.util.Map<")) {
-                    requestBodyTypes.put(operationId, requestType);
-                }
-            });
-        });
-
-        return requestBodyTypes;
-    }
-
-    private Map<String, String> computeArrayMapTypes(JsonNode json) {
-        Map<String, String> arrayMapTypes = new HashMap<>();
-        JsonNode schemas = json.path("components").path("schemas");
-        if (!schemas.isObject()) {
-            return arrayMapTypes;
-        }
-
-        schemas.fields().forEachRemaining(entry -> {
-            JsonNode schema = entry.getValue();
-            JsonNode typeNode = schema.path("x-codegen-type");
-            if (!typeNode.isTextual() || !"ArrayMap".equals(typeNode.asText())) {
-                return;
-            }
-
-            JsonNode additionalProperties = schema.path("additionalProperties");
-            if (!additionalProperties.isObject()) {
-                return;
-            }
-
-            String valueType = resolveSchemaType(additionalProperties, arrayMapTypes);
-            arrayMapTypes.put(entry.getKey(), "java.util.Map<String, " + valueType + ">");
-        });
-
-        return arrayMapTypes;
-    }
-
-    private String resolveBodyType(JsonNode requestBody, Map<String, String> arrayMapTypes) {
-        JsonNode content = requestBody.path("content");
-        if (!content.isObject() || content.size() == 0) {
-            return null;
-        }
-
-        JsonNode mediaType = content.elements().next();
-        JsonNode schema = mediaType.path("schema");
-        if (!schema.isObject()) {
-            return null;
-        }
-
-        return resolveSchemaType(schema, arrayMapTypes);
-    }
-
-    private String resolveSchemaType(JsonNode schema, Map<String, String> arrayMapTypes) {
-        JsonNode ref = schema.get("$ref");
-        if (ref != null && ref.isTextual()) {
-            String refName = ref.asText();
-            String refKey = refName.substring(refName.lastIndexOf('/') + 1);
-            String arrayMapType = arrayMapTypes.get(refKey);
-            if (arrayMapType != null) {
-                return arrayMapType;
-            }
-            return CodegenUtil.schemaRefToFQCN(settings, document, refName, this.settings.javaPackage + ".beans");
-        }
-
-        JsonNode type = schema.get("type");
-        if (type != null && type.isTextual()) {
-            switch (type.asText()) {
-                case "array":
-                    JsonNode items = schema.get("items");
-                    String itemType = items != null ? resolveSchemaType(items, arrayMapTypes) : "java.lang.Object";
-                    return "java.util.List<" + itemType + ">";
-                case "string":
-                    return "java.lang.String";
-                case "integer":
-                    return "java.lang.Integer";
-                case "number":
-                    return "java.lang.Double";
-                case "boolean":
-                    return "java.lang.Boolean";
-                case "object":
-                    JsonNode additionalProperties = schema.get("additionalProperties");
-                    if (additionalProperties != null && additionalProperties.isObject()) {
-                        String valueType = resolveSchemaType(additionalProperties, arrayMapTypes);
-                        return "java.util.Map<String, " + valueType + ">";
-                    }
-                    return "java.lang.Object";
-                default:
-                    return "java.lang.Object";
-            }
-        }
-
-        return "java.lang.Object";
-    }
-
-    private String textValue(JsonNode node, String field) {
-        JsonNode value = node.get(field);
-        return value != null && value.isTextual() ? value.asText() : null;
-    }
-
     public static Properties getFormatterProperties() {
         Properties formattingProperties = new Properties();
         formattingProperties.setProperty("org.eclipse.jdt.core.formatter.indentation.size", "2");
@@ -894,15 +761,20 @@ public class OpenApi2JaxRs {
             required = Boolean.FALSE;
         }
 
+        String collection = schema.getCollection();
+
+        // A pre-computed Java type (e.g. a map type from OpenApiMapDataTypeProcessor) takes precedence,
+        // but may still be wrapped in a list/set (e.g. an array of ArrayMap items).
         String existingJavaType = schema.getExistingJavaType();
         if (existingJavaType != null && !existingJavaType.isBlank()) {
-            if ("APICURIO_CODEGEN_BYTE_ARRAY_REPRESENTATION".equals(existingJavaType)) {
-                return parseType("byte[]");
+            if ("list".equals(collection)) {
+                return parseType(String.format("java.util.List<%s>", existingJavaType));
+            } else if ("set".equals(collection)) {
+                return parseType(String.format("java.util.Set<%s>", existingJavaType));
             }
             return parseType(existingJavaType);
         }
 
-        String collection = schema.getCollection();
         List<String> type = Optional.ofNullable(schema.getType()).orElseGet(Collections::emptyList);
         String format = schema.getFormat();
 
@@ -1169,7 +1041,10 @@ public class OpenApi2JaxRs {
                             String cgBeanFQCN = cgBean.getPackage() + "." + CodegenUtil.toClassName(settings, cgBean.getName());
                             if (beanClassname.equals(cgBeanFQCN)) {
                                 Schema schema = new Schema(classnameToUri(beanClassname), cgBean.get$schema(), null);
-                                JType jclass = codeModel._getClass(beanClassname);
+                                JType jclass = existingMapType(cgBean, codeModel);
+                                if (jclass == null) {
+                                    jclass = codeModel._getClass(beanClassname);
+                                }
                                 if (jclass == null) {
                                     jclass = codeModel.directClass(beanClassname);
                                 }
@@ -1188,6 +1063,24 @@ public class OpenApi2JaxRs {
 
         String fqcn = generatedBeanFQCN;
         codeWriter.indexBean(fqcn, bean);
+    }
+
+    /**
+     * Returns the Java map type for a bean whose schema was converted to a map type (see
+     * {@code OpenApiMapDataTypeProcessor}), or null if the bean is a regular class. No class is
+     * generated for such beans, so any $ref to them must resolve to the map type instead.
+     *
+     * @param bean the bean being referenced
+     * @param codeModel the code model used to resolve the type
+     * @return the resolved map type, or null
+     */
+    private static JType existingMapType(CodegenJavaBean bean, JCodeModel codeModel) {
+        JsonNode existingJavaType = bean.get$schema() != null ? bean.get$schema().get(CodegenUtil.EXISTING_JAVA_TYPE) : null;
+        if (existingJavaType == null || !existingJavaType.isTextual()
+                || !existingJavaType.asText().startsWith(CodegenUtil.JAVA_MAP_TYPE_PREFIX)) {
+            return null;
+        }
+        return TypeUtil.resolveType(codeModel.rootPackage(), existingJavaType.asText());
     }
 
     protected URL getCommonResource(String name) {
