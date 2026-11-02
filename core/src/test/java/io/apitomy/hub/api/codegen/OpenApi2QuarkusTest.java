@@ -88,6 +88,11 @@ public class OpenApi2QuarkusTest extends OpenApi2TestBase {
         doFullTest("OpenApi2QuarkusTest/simple-type-str-obj.json", false, "_expected-issues/simple-type-str-obj", false);
     }
 
+    @Test
+    public void testMapTypes() throws IOException {
+        doFullTest("OpenApi2QuarkusTest/map-types.json", false, "_expected-issues/map-types", false);
+    }
+
 
 
     @Test

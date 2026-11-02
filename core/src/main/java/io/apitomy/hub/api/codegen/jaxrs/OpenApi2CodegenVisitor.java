@@ -354,6 +354,7 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
                 if (returnType.getCollection() != null) { cgArgument.setCollection(returnType.getCollection()); }
                 if (returnType.getType() != null) { cgArgument.setType(returnType.getType()); }
                 if (returnType.getFormat() != null) { cgArgument.setFormat(returnType.getFormat()); }
+                if (returnType.getExistingJavaType() != null) { cgArgument.setExistingJavaType(returnType.getExistingJavaType()); }
 
                 clonedMethod.getArguments().add(cgArgument);
 
@@ -588,6 +589,17 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
         target.setType((List<String>) null);
         String $ref = schema31.get$ref();
 
+        // Map types (x-codegen-type StringMap/StringObjectMap/ArrayMap) are resolved to a Java map
+        // type by OpenApiMapDataTypeProcessor during pre-processing - either on the schema itself
+        // (when inlined) or on the referenced schema definition (no bean class is generated for it).
+        String mapJavaType = $ref != null
+                ? CodegenUtil.refToExistingMapType((Document) schema.root(), $ref)
+                : CodegenUtil.getExistingMapType(schema31);
+        if (mapJavaType != null) {
+            target.setExistingJavaType(mapJavaType);
+            target.setCollection("map");
+        }
+
         if ($ref != null) {
             target.setType(this.typeFromSchemaRef((Document) schema.root(), $ref));
         } else if (containsValue(schema31.getType(), "array")) {
@@ -606,15 +618,6 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
         } else if (containsValue(schema31.getType(), "object")) {
             setIfPresent(() -> toStringList(schema31.getType()), target::setType);
             setIfPresent(schema::getFormat, target::setFormat);
-            // TODO: Consider representing object as map
-            //if (schema.getAdditionalProperties() != null && schema.getAdditionalProperties().isSchema()) {
-            //    setSchemaProperties(target, (OpenApi3xSchema) schema.getAdditionalProperties().asSchema());
-            //}
-            //
-            //setIfPresent(schema::isNullable, target::setNullable);
-            //setIfPresent(schema::getMaxProperties, value -> target.setMaxProperties(value.longValue()));
-            //setIfPresent(schema::getMinProperties, value -> target.setMinProperties(value.longValue()));
-            //target.setCollection("map");
         } else if (containsValue(schema31.getType(), "string")) {
             setIfPresent(() -> toStringList(schema31.getType()), target::setType);
             setIfPresent(schema::getFormat, target::setFormat);
