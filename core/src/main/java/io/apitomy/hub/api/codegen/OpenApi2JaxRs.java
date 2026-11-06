@@ -125,6 +125,8 @@ public class OpenApi2JaxRs {
 
     protected String openApiDoc;
     protected Path openApiDocBaseDir;
+    protected Path externalRefsRootDir;
+    protected transient String dereferencedOpenApiDoc;
     protected transient Document document;
     protected JaxRsProjectSettings settings;
     protected boolean updateOnly;
@@ -158,6 +160,7 @@ public class OpenApi2JaxRs {
      */
     public void setOpenApiDocument(String content) {
         this.openApiDoc = content;
+        this.openApiDocBaseDir = null;
     }
 
     /**
@@ -167,17 +170,41 @@ public class OpenApi2JaxRs {
      * @throws IOException
      */
     public void setOpenApiDocument(URL url) throws IOException {
-        this.openApiDocBaseDir = resolveBaseDir(url);
         try (InputStream is = url.openStream()) {
             this.setOpenApiDocument(is);
         }
+        this.openApiDocBaseDir = resolveBaseDir(url);
+    }
+
+    /**
+     * Sets the directory that relative $refs to other files (e.g. "./common.yaml#/components/schemas/Pet")
+     * found in the OpenAPI document are resolved against.  This is set automatically when the
+     * document is supplied as a local file URL; callers supplying the document as a String or
+     * InputStream can call this <em>after</em> setting the document to enable cross-file $ref
+     * resolution.  Setting the document again resets it.
+     *
+     * @param baseDir the directory the OpenAPI document lives in, or null to disable cross-file resolution
+     */
+    public void setOpenApiDocumentBaseDir(Path baseDir) {
+        this.openApiDocBaseDir = baseDir;
+    }
+
+    /**
+     * Sets the directory that cross-file $refs are allowed to reach.  Refs resolving to a file
+     * outside of it fail generation.  Defaults to the OpenAPI document's own directory (see
+     * {@link #setOpenApiDocumentBaseDir(Path)}); set it to a parent directory to allow refs
+     * such as "../shared/types.yaml".
+     *
+     * @param rootDir the allowed root directory, or null for the default
+     */
+    public void setExternalRefsRootDir(Path rootDir) {
+        this.externalRefsRootDir = rootDir;
     }
 
     /**
      * Determines the directory the given document URL lives in, so that relative $refs to
      * sibling files can later be resolved against it.  Returns null for anything that isn't a
      * local file (e.g. an http(s) URL), since cross-file resolution requires a filesystem base.
-     *
      */
     private static Path resolveBaseDir(URL url) {
         if (!"file".equals(url.getProtocol())) {
@@ -198,7 +225,7 @@ public class OpenApi2JaxRs {
      * @throws IOException
      */
     public void setOpenApiDocument(InputStream stream) throws IOException {
-        this.openApiDoc = IOUtils.toString(stream, utf8);
+        this.setOpenApiDocument(IOUtils.toString(stream, utf8));
     }
 
     protected GenerationConfig buildGenerationConfig() {
@@ -316,7 +343,10 @@ public class OpenApi2JaxRs {
             }
             log.append("Generating " + specPath + "\r\n");
             zipOutput.putNextEntry(new ZipEntry(specPath));
-            zipOutput.write(this.openApiDoc.getBytes(utf8));
+            // If cross-file $refs were resolved, write the self-contained (dereferenced) document,
+            // since the referenced files are not part of the generated project.
+            String spec = this.dereferencedOpenApiDoc != null ? this.dereferencedOpenApiDoc : this.openApiDoc;
+            zipOutput.write(spec.getBytes(utf8));
             zipOutput.closeEntry();
         }
 
@@ -472,15 +502,26 @@ public class OpenApi2JaxRs {
      * Resolves any $refs in the document that point to another file (relative to the location
      * of the entry document) and pulls their content into this document, so that the rest of the
      * pipeline only ever has to deal with same-document $refs.  If the entry document's location
-     * is unknown (e.g. it was supplied as a raw String or InputStream), this is a no-op.
+     * is unknown (e.g. it was supplied as a raw String or InputStream without calling
+     * {@link #setOpenApiDocumentBaseDir(Path)}), this is a no-op.
      *
-     * @param document
+     * When at least one file $ref was resolved, the resulting (OpenAPI 3.1) document is also kept
+     * so it can be written as the generated project's spec instead of the original one.
+     *
+     * @param document the (OpenAPI 3.1) document to dereference
+     * @throws io.apitomy.hub.api.codegen.refs.ExternalReferenceException if a file $ref cannot be resolved
      */
     protected Document dereferenceExternalRefs(Document document) {
+        this.dereferencedOpenApiDoc = null;
         if (openApiDocBaseDir == null) {
             return document;
         }
-        return Library.dereferenceDocument(document, new FileReferenceResolver(openApiDocBaseDir), false);
+        FileReferenceResolver resolver = new FileReferenceResolver(openApiDocBaseDir, externalRefsRootDir);
+        Document dereferenced = resolver.dereference(document);
+        if (resolver.getResolvedCount() > 0) {
+            this.dereferencedOpenApiDoc = Library.writeDocumentToJSONString(dereferenced);
+        }
+        return dereferenced;
     }
 
     /**

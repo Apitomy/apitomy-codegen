@@ -1,0 +1,7 @@
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        sku:
+          type: string

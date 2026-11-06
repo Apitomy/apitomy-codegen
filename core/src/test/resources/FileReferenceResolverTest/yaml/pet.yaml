@@ -1,0 +1,12 @@
+openapi: 3.1.0
+info:
+  title: Pet types
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
