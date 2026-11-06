@@ -1,0 +1,16 @@
+{
+    "openapi": "3.1.0",
+    "info": { "title": "YAML ref", "version": "1.0.0" },
+    "paths": {
+        "/pets": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "A pet.",
+                        "content": { "application/json": { "schema": { "$ref": "./yaml/pet.yaml#/components/schemas/Pet" } } }
+                    }
+                }
+            }
+        }
+    }
+}

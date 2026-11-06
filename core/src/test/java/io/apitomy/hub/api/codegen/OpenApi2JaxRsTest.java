@@ -165,6 +165,16 @@ public class OpenApi2JaxRsTest extends OpenApi2TestBase {
     }
 
     /**
+     * The entry file (multi-file-api.json) is deliberately OpenAPI 3.0.2 while the referenced
+     * file (multi-file-common.json) is 3.1.0, to check that files of different versions can be
+     * combined.  The generated META-INF/openapi.json is the dereferenced (self-contained) 3.1 document.
+     */
+    @Test
+    public void testGenerateFull_MultiFileExternalRef() throws IOException {
+        doFullTest("OpenApi2JaxRsTest/multi-file-api.json", UpdateOnly.no, Reactive.no, "_expected-multi-file/generated-api", false);
+    }
+
+    /**
      * Test method for {@link io.apitomy.hub.api.codegen.OpenApi2JaxRs#generate()}.
      */
     @Test

@@ -1,0 +1,27 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Multi File Sample API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/pets": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "./multi-file-common.json#/components/schemas/Pet"
+                                }
+                            }
+                        },
+                        "description": "Returns a pet."
+                    }
+                },
+                "operationId": "getPet",
+                "summary": "Get a pet"
+            }
+        }
+    }
+}
