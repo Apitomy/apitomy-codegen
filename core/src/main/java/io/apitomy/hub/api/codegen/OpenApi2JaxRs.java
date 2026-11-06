@@ -74,6 +74,7 @@ import org.jsonschema2pojo.SchemaMapper;
 import org.jsonschema2pojo.SchemaStore;
 import org.jsonschema2pojo.rules.Rule;
 import org.jsonschema2pojo.rules.RuleFactory;
+import org.jsonschema2pojo.util.TypeUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -451,7 +452,7 @@ public class OpenApi2JaxRs {
      * @param document
      */
     protected Document preProcess(Document document) {
-        DocumentPreProcessor preprocessor = new DocumentPreProcessor();
+        DocumentPreProcessor preprocessor = new DocumentPreProcessor(this.settings);
         preprocessor.process(document);
 
         if (Boolean.FALSE) {
@@ -761,6 +762,19 @@ public class OpenApi2JaxRs {
         }
 
         String collection = schema.getCollection();
+
+        // A pre-computed Java type (e.g. a map type from OpenApiMapDataTypeProcessor) takes precedence,
+        // but may still be wrapped in a list/set (e.g. an array of ArrayMap items).
+        String existingJavaType = schema.getExistingJavaType();
+        if (existingJavaType != null && !existingJavaType.isBlank()) {
+            if ("list".equals(collection)) {
+                return parseType(String.format("java.util.List<%s>", existingJavaType));
+            } else if ("set".equals(collection)) {
+                return parseType(String.format("java.util.Set<%s>", existingJavaType));
+            }
+            return parseType(existingJavaType);
+        }
+
         List<String> type = Optional.ofNullable(schema.getType()).orElseGet(Collections::emptyList);
         String format = schema.getFormat();
 
@@ -1027,7 +1041,10 @@ public class OpenApi2JaxRs {
                             String cgBeanFQCN = cgBean.getPackage() + "." + CodegenUtil.toClassName(settings, cgBean.getName());
                             if (beanClassname.equals(cgBeanFQCN)) {
                                 Schema schema = new Schema(classnameToUri(beanClassname), cgBean.get$schema(), null);
-                                JType jclass = codeModel._getClass(beanClassname);
+                                JType jclass = existingMapType(cgBean, codeModel);
+                                if (jclass == null) {
+                                    jclass = codeModel._getClass(beanClassname);
+                                }
                                 if (jclass == null) {
                                     jclass = codeModel.directClass(beanClassname);
                                 }
@@ -1046,6 +1063,24 @@ public class OpenApi2JaxRs {
 
         String fqcn = generatedBeanFQCN;
         codeWriter.indexBean(fqcn, bean);
+    }
+
+    /**
+     * Returns the Java map type for a bean whose schema was converted to a map type (see
+     * {@code OpenApiMapDataTypeProcessor}), or null if the bean is a regular class. No class is
+     * generated for such beans, so any $ref to them must resolve to the map type instead.
+     *
+     * @param bean the bean being referenced
+     * @param codeModel the code model used to resolve the type
+     * @return the resolved map type, or null
+     */
+    private static JType existingMapType(CodegenJavaBean bean, JCodeModel codeModel) {
+        JsonNode existingJavaType = bean.get$schema() != null ? bean.get$schema().get(CodegenUtil.EXISTING_JAVA_TYPE) : null;
+        if (existingJavaType == null || !existingJavaType.isTextual()
+                || !existingJavaType.asText().startsWith(CodegenUtil.JAVA_MAP_TYPE_PREFIX)) {
+            return null;
+        }
+        return TypeUtil.resolveType(codeModel.rootPackage(), existingJavaType.asText());
     }
 
     protected URL getCommonResource(String name) {

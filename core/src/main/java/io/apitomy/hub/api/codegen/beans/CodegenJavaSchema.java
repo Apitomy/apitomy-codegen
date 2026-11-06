@@ -24,6 +24,7 @@ public class CodegenJavaSchema {
     private Long minProperties;
     private String defaultValue;
     private boolean nullable;
+    private String existingJavaType;
 
     public void setType(String type) {
         this.type = Collections.singletonList(type);
@@ -41,7 +42,7 @@ public class CodegenJavaSchema {
     public int hashCode() {
         return Objects.hash(collection, constant, defaultValue, exclusiveMaximum, exclusiveMinimum, format, maxItems,
                 maxLength, maxProperties, maximum, minItems, minLength, minProperties, minimum, nullable, pattern,
-                type, uniqueItems);
+                existingJavaType, type, uniqueItems);
     }
 
     @Override
@@ -61,7 +62,8 @@ public class CodegenJavaSchema {
                 && Objects.equals(maxProperties, other.maxProperties) && Objects.equals(maximum, other.maximum)
                 && Objects.equals(minItems, other.minItems) && Objects.equals(minLength, other.minLength)
                 && Objects.equals(minProperties, other.minProperties) && Objects.equals(minimum, other.minimum)
-                && nullable == other.nullable && Objects.equals(type, other.type)
+                && nullable == other.nullable && Objects.equals(existingJavaType, other.existingJavaType)
+                && Objects.equals(type, other.type)
                 && Objects.equals(uniqueItems, other.uniqueItems);
     }
 
@@ -302,6 +304,20 @@ public class CodegenJavaSchema {
      */
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
+    }
+
+    /**
+     * @return the existingJavaType
+     */
+    public String getExistingJavaType() {
+        return existingJavaType;
+    }
+
+    /**
+     * @param existingJavaType the existingJavaType to set
+     */
+    public void setExistingJavaType(String existingJavaType) {
+        this.existingJavaType = existingJavaType;
     }
 
 }

@@ -21,6 +21,7 @@ import static io.apitomy.hub.api.codegen.util.CodegenUtil.containsValue;
 import io.apitomy.datamodels.models.openapi.v3x.v31.OpenApi31Schema;
 import io.apitomy.datamodels.models.union.StringUnionValueImpl;
 import io.apitomy.hub.api.codegen.jaxrs.TraversingOpenApi31VisitorAdapter;
+import io.apitomy.hub.api.codegen.util.CodegenUtil;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -36,7 +37,7 @@ public class OpenApiByteSimpleTypeProcessor extends TraversingOpenApi31VisitorAd
         if (containsValue(schema.getType(), "string") && "byte".equals(schema.getFormat())) {
             schema.setType(new StringUnionValueImpl("object"));
             // workaround for a jsonschema2pojo limitation
-            schema.addExtraProperty("existingJavaType", factory.textNode("APITOMY_CODEGEN_BYTE_ARRAY_REPRESENTATION"));
+            schema.addExtraProperty(CodegenUtil.EXISTING_JAVA_TYPE, factory.textNode(CodegenUtil.BYTE_ARRAY_REPRESENTATION));
         }
     }
 
