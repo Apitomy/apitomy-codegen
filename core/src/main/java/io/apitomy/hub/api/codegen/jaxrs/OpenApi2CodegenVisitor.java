@@ -594,9 +594,12 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
         if ($ref != null) {
             target.setType(this.typeFromSchemaRef((Document) schema.root(), $ref));
         } else if (containsValue(schema31.getType(), "array")) {
+            // Nullability belongs to the array itself, not to its items, so preserve it across the recursive call.
+            boolean arrayNullable = target.isNullable();
             if (schema.getItems() != null) {
                 setSchemaProperties(target, schema.getItems());
             }
+            target.setNullable(arrayNullable);
 
             setIfPresent(schema::getMaxItems, value -> target.setMaxItems(value.longValue()));
             setIfPresent(schema::getMinItems, value -> target.setMinItems(value.longValue()));

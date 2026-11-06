@@ -10,6 +10,14 @@
                 "operationId": "getItems",
                 "parameters": [
                     {
+                        "name": "id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "name": "name",
                         "in": "query",
                         "required": true,
@@ -24,6 +32,28 @@
                         "schema": {
                             "type": ["integer", "null"]
                         }
+                    },
+                    {
+                        "name": "tags",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": ["array", "null"],
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "labels",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": ["string", "null"]
+                            }
+                        }
                     }
                 ],
                 "responses": {
@@ -35,6 +65,7 @@
             "post": {
                 "operationId": "createItem",
                 "requestBody": {
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
@@ -44,6 +75,24 @@
                                         "type": ["string", "null"]
                                     }
                                 }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "ok"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "replaceItem",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Item"
                             }
                         }
                     }
