@@ -3,7 +3,6 @@ package io.apitomy.hub.api.codegen.beans;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 public class CodegenJavaSchema {
 
@@ -24,6 +23,7 @@ public class CodegenJavaSchema {
     private Long maxProperties;
     private Long minProperties;
     private String defaultValue;
+    private boolean nullable;
     private String existingJavaType;
 
     public void setType(String type) {
@@ -31,13 +31,17 @@ public class CodegenJavaSchema {
     }
 
     public boolean isNullable() {
-        return Optional.ofNullable(type).map(t -> t.contains("null")).orElse(false);
+        return nullable;
+    }
+
+    public void setNullable(boolean nullable) {
+        this.nullable = nullable;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(collection, constant, defaultValue, exclusiveMaximum, exclusiveMinimum, format, maxItems,
-                maxLength, maxProperties, maximum, minItems, minLength, minProperties, minimum, pattern,
+                maxLength, maxProperties, maximum, minItems, minLength, minProperties, minimum, nullable, pattern,
                 existingJavaType, type, uniqueItems);
     }
 
@@ -58,7 +62,8 @@ public class CodegenJavaSchema {
                 && Objects.equals(maxProperties, other.maxProperties) && Objects.equals(maximum, other.maximum)
                 && Objects.equals(minItems, other.minItems) && Objects.equals(minLength, other.minLength)
                 && Objects.equals(minProperties, other.minProperties) && Objects.equals(minimum, other.minimum)
-                && Objects.equals(existingJavaType, other.existingJavaType) && Objects.equals(type, other.type)
+                && nullable == other.nullable && Objects.equals(existingJavaType, other.existingJavaType)
+                && Objects.equals(type, other.type)
                 && Objects.equals(uniqueItems, other.uniqueItems);
     }
 
