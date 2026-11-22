@@ -1,0 +1,16 @@
+{
+    "openapi": "3.1.0",
+    "info": { "title": "Cyclic files", "version": "1.0.0" },
+    "paths": {
+        "/a": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "An A.",
+                        "content": { "application/json": { "schema": { "$ref": "./cycle/a.json#/components/schemas/A" } } }
+                    }
+                }
+            }
+        }
+    }
+}

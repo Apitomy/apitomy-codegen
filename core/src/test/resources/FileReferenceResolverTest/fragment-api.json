@@ -1,0 +1,16 @@
+{
+    "openapi": "3.1.0",
+    "info": { "title": "Fragment-only file", "version": "1.0.0" },
+    "paths": {
+        "/tags": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "A tag.",
+                        "content": { "application/json": { "schema": { "$ref": "./fragment/components.yaml#/components/schemas/Tag" } } }
+                    }
+                }
+            }
+        }
+    }
+}

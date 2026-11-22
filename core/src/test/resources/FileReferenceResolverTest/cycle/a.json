@@ -1,0 +1,7 @@
+{
+    "components": {
+        "schemas": {
+            "A": { "type": "object", "properties": { "b": { "$ref": "./b.json#/components/schemas/B" } } }
+        }
+    }
+}

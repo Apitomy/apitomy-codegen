@@ -1,0 +1,8 @@
+# Deliberately has no "openapi" header: only a components section.
+components:
+  schemas:
+    Tag:
+      type: object
+      properties:
+        label:
+          type: string

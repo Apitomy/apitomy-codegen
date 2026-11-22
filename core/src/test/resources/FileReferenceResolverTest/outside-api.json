@@ -1,0 +1,16 @@
+{
+    "openapi": "3.1.0",
+    "info": { "title": "Ref outside of the allowed root", "version": "1.0.0" },
+    "paths": {
+        "/pets": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "A pet.",
+                        "content": { "application/json": { "schema": { "$ref": "../OpenApi2JaxRsTest/multi-file-common.json#/components/schemas/Pet" } } }
+                    }
+                }
+            }
+        }
+    }
+}

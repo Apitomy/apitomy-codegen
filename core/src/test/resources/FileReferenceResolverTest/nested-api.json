@@ -1,0 +1,21 @@
+{
+    "openapi": "3.1.0",
+    "info": { "title": "Nested refs", "version": "1.0.0" },
+    "paths": {
+        "/orders": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "An order.",
+                        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OrderAlias" } } }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "OrderAlias": { "$ref": "./nested/a/types.json#/components/schemas/Order" }
+        }
+    }
+}
