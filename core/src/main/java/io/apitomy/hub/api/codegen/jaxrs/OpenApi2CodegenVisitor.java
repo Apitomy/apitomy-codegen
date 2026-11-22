@@ -59,6 +59,7 @@ import io.apitomy.datamodels.models.openapi.v3x.OpenApi3xSchema;
 import io.apitomy.datamodels.models.openapi.v3x.v31.OpenApi31Parameter;
 import io.apitomy.datamodels.models.openapi.v3x.v31.OpenApi31Response;
 import io.apitomy.datamodels.models.openapi.v3x.v31.OpenApi31Schema;
+import io.apitomy.datamodels.models.union.StringStringListUnion;
 import io.apitomy.datamodels.util.NodeUtil;
 import io.apitomy.hub.api.codegen.CodegenExtensions;
 import io.apitomy.hub.api.codegen.JaxRsProjectSettings;
@@ -355,6 +356,7 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
                 if (returnType.getType() != null) { cgArgument.setType(returnType.getType()); }
                 if (returnType.getFormat() != null) { cgArgument.setFormat(returnType.getFormat()); }
                 if (returnType.getExistingJavaType() != null) { cgArgument.setExistingJavaType(returnType.getExistingJavaType()); }
+                cgArgument.setNullable(returnType.isNullable());
 
                 clonedMethod.getArguments().add(cgArgument);
 
@@ -587,6 +589,7 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
         OpenApi31Schema schema31 = (OpenApi31Schema) schema;
 
         target.setType((List<String>) null);
+        target.setNullable(containsValue(schema31.getType(), "null"));
         String $ref = schema31.get$ref();
 
         // Map types (x-codegen-type StringMap/StringObjectMap/ArrayMap) are resolved to a Java map
@@ -603,9 +606,12 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
         if ($ref != null) {
             target.setType(this.typeFromSchemaRef((Document) schema.root(), $ref));
         } else if (containsValue(schema31.getType(), "array")) {
+            // Nullability belongs to the array itself, not to its items, so preserve it across the recursive call.
+            boolean arrayNullable = target.isNullable();
             if (schema.getItems() != null) {
                 setSchemaProperties(target, schema.getItems());
             }
+            target.setNullable(arrayNullable);
 
             setIfPresent(schema::getMaxItems, value -> target.setMaxItems(value.longValue()));
             setIfPresent(schema::getMinItems, value -> target.setMinItems(value.longValue()));
@@ -616,16 +622,16 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
                 target.setCollection("list");
             }
         } else if (containsValue(schema31.getType(), "object")) {
-            setIfPresent(() -> toStringList(schema31.getType()), target::setType);
+            setIfPresent(() -> nonNullTypes(schema31.getType()), target::setType);
             setIfPresent(schema::getFormat, target::setFormat);
         } else if (containsValue(schema31.getType(), "string")) {
-            setIfPresent(() -> toStringList(schema31.getType()), target::setType);
+            setIfPresent(() -> nonNullTypes(schema31.getType()), target::setType);
             setIfPresent(schema::getFormat, target::setFormat);
             setIfPresent(schema::getMaxLength, value -> target.setMaxLength(value.longValue()));
             setIfPresent(schema::getMinLength, value -> target.setMinLength(value.longValue()));
             setIfPresent(schema::getPattern, target::setPattern);
         } else if (containsValue(schema31.getType(), "integer", "number")) {
-            setIfPresent(() -> toStringList(schema31.getType()), target::setType);
+            setIfPresent(() -> nonNullTypes(schema31.getType()), target::setType);
             setIfPresent(schema::getFormat, target::setFormat);
 
             if (schema31.getExclusiveMaximum() != null) {
@@ -644,7 +650,7 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
                 target.setExclusiveMinimum(false);
             }
         } else {
-            setIfPresent(() -> toStringList(schema31.getType()), target::setType);
+            setIfPresent(() -> nonNullTypes(schema31.getType()), target::setType);
             setIfPresent(schema::getFormat, target::setFormat);
         }
 
@@ -661,6 +667,17 @@ public class OpenApi2CodegenVisitor extends TraversingOpenApi31VisitorAdapter {
         if (value != null) {
             target.accept(value);
         }
+    }
+
+    private List<String> nonNullTypes(StringStringListUnion typeUnion) {
+        List<String> types = toStringList(typeUnion);
+
+        if (types == null) {
+            return null;
+        }
+
+        List<String> noNullTypes = types.stream().filter(type -> !"null".equals(type)).collect(Collectors.toList());
+        return noNullTypes.isEmpty() ? null : noNullTypes;
     }
 
     private List<String> typeFromSchemaRef(Document document, String schemaRef) {

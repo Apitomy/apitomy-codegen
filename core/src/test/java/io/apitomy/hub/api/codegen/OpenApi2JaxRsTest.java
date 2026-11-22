@@ -307,6 +307,66 @@ public class OpenApi2JaxRsTest extends OpenApi2TestBase {
     }
 
     /**
+     * Test that OpenAPI 3.1 nullable union types ({@code type: [T, "null"]}) resolve to the non-null Java type
+     * and suppress {@code @NotNull}, while non-nullable required values still get {@code @NotNull}.
+     * Nullability of an array applies to the array itself, not to its items (and vice versa).
+     */
+    @Test
+    public void testNullableUnionTypes() throws IOException {
+        JaxRsProjectSettings settings = new JaxRsProjectSettings();
+        settings.codeOnly = false;
+        settings.reactive = false;
+        settings.artifactId = "generated-api";
+        settings.groupId = "org.example.api";
+        settings.javaPackage = "org.example.api";
+
+        OpenApi2JaxRs generator = new OpenApi2JaxRs();
+        generator.setSettings(settings);
+        generator.setUpdateOnly(false);
+        generator.setOpenApiDocument(getClass().getClassLoader().getResource(
+                "OpenApi2JaxRsTest/nullable-union-types.json"));
+
+        ByteArrayOutputStream outputStream = generator.generate();
+
+        String resourceContent = null;
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.getName().endsWith("ItemsResource.java")) {
+                    resourceContent = IOUtils.toString(zis, StandardCharsets.UTF_8);
+                    break;
+                }
+            }
+        }
+        Assert.assertNotNull(resourceContent);
+
+        // Positive control: a required, non-nullable parameter still gets @NotNull.
+        Assert.assertTrue(resourceContent.contains("@NotNull String id"));
+
+        // A `type: [T, "null"]` union must not leak "null" into the resolved Java type.
+        Assert.assertTrue(resourceContent.contains("String name"));
+        Assert.assertTrue(resourceContent.contains("BigInteger count"));
+
+        // Nullable query parameters must not be annotated @NotNull.
+        Assert.assertFalse(resourceContent.contains("@NotNull String name"));
+        Assert.assertFalse(resourceContent.contains("@NotNull BigInteger count"));
+
+        // A nullable array must not be annotated @NotNull, even though its items are non-nullable.
+        Assert.assertTrue(resourceContent.contains("List<String> tags"));
+        Assert.assertFalse(resourceContent.contains("@NotNull List<String> tags"));
+
+        // A non-nullable array of nullable items is still @NotNull.
+        Assert.assertTrue(resourceContent.contains("@NotNull List<String> labels"));
+
+        // A required but nullable request body must not be annotated @NotNull.
+        Assert.assertTrue(resourceContent.contains("InputStream data"));
+        Assert.assertFalse(resourceContent.contains("@NotNull InputStream data"));
+
+        // A required, non-nullable request body is annotated @NotNull.
+        Assert.assertTrue(resourceContent.contains("@NotNull Item data"));
+    }
+
+    /**
      * Test that the generator detects and reports duplicate method names with a error.
      * Two operations on the same interface resolve to method name "items":
      *   - GET /products (operationId: "items")
